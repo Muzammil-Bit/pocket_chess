@@ -94,12 +94,17 @@ class GameScreen extends ConsumerWidget {
               blackCaptured: state.blackCaptured,
               whiteCaptured: state.whiteCaptured,
               board: ChessBoard(
-                board: state.board,
+                fen: state.fen,
                 boardSize: boardSize,
-                selectedSquare: state.selectedSquare,
-                legalMoves: state.legalMoves,
+                validMovesByOrigin: state.legalMovesByOrigin,
+                isInteractive:
+                    !state.isAiThinking &&
+                    state.pendingPromotionMove == null &&
+                    !state.status.isGameOver &&
+                    state.turn == PieceSide.white,
+                isCheck: state.status.inCheck,
                 lastMove: state.lastMove,
-                onSquareTap: (square) => controller.handleSquareTap(square),
+                onMove: (move) => controller.handleMove(move),
               ),
             );
 

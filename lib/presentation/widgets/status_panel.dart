@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/game_status.dart';
 import '../../domain/models/piece_data.dart';
-import '../../domain/models/piece_glyphs.dart';
 
 class StatusPanel extends StatelessWidget {
   const StatusPanel({
@@ -26,10 +25,17 @@ class StatusPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (statusText != null) ...[
-            _StatusBadge(label: statusText, isThinking: isAiThinking),
-            const SizedBox(height: 14),
-          ],
+          Visibility(
+            visible: statusText != null,
+            maintainState: true,
+            maintainAnimation: true,
+            maintainSize: true,
+            child: _StatusBadge(
+              label: statusText ?? ' ',
+              isThinking: isAiThinking,
+            ),
+          ),
+          const SizedBox(height: 14),
           Text(
             'Turn: ${turn == PieceSide.white ? 'White' : 'Black'}',
             key: const Key('turn-label'),

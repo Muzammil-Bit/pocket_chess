@@ -5,6 +5,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pocket_chess/app.dart';
 
 void main() {
+  Offset squareCenter(Rect rect, String algebraic) {
+    final file = algebraic.codeUnitAt(0) - 97;
+    final rank = int.parse(algebraic[1]);
+    final squareSize = rect.width / 8;
+    return Offset(
+      rect.left + (file + 0.5) * squareSize,
+      rect.top + ((8 - rank) + 0.5) * squareSize,
+    );
+  }
+
   testWidgets('landing page opens the dedicated game page', (
     WidgetTester tester,
   ) async {
@@ -18,7 +28,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Game Room'), findsOneWidget);
-    expect(find.byKey(const Key('square-e2')), findsOneWidget);
+    expect(find.byKey(const Key('chessground-board')), findsOneWidget);
   });
 
   testWidgets(
@@ -28,7 +38,8 @@ void main() {
       await tester.tap(find.byKey(const Key('start-game-button')));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('square-e2')));
+      final boardRect = tester.getRect(find.byKey(const Key('chessground-board')));
+      await tester.tapAt(squareCenter(boardRect, 'e2'));
       await tester.pump();
 
       expect(find.text('Game Room'), findsOneWidget);
@@ -41,15 +52,17 @@ void main() {
     await tester.tap(find.byKey(const Key('start-game-button')));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byKey(const Key('square-e2')));
+    final boardFinder = find.byKey(const Key('chessground-board'));
+    final boardRect = tester.getRect(boardFinder);
+    await tester.tapAt(squareCenter(boardRect, 'e2'));
     await tester.pump();
-    await tester.tap(find.byKey(const Key('square-e4')));
+    await tester.tapAt(squareCenter(boardRect, 'e4'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Restart'));
     await tester.pumpAndSettle();
 
     expect(find.text('Turn: White'), findsOneWidget);
-    expect(find.byKey(const Key('square-e2')), findsOneWidget);
+    expect(find.byKey(const Key('chessground-board')), findsOneWidget);
   });
 }

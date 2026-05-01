@@ -12,6 +12,7 @@ class GameState {
     required this.turn,
     required this.status,
     required this.mode,
+    this.legalMovesByOrigin = const {},
     this.selectedSquare,
     this.legalMoves = const [],
     this.whiteCaptured = const [],
@@ -26,6 +27,7 @@ class GameState {
   final PieceSide turn;
   final GameStatus status;
   final GameMode mode;
+  final Map<SquarePosition, List<MoveOption>> legalMovesByOrigin;
   final SquarePosition? selectedSquare;
   final List<MoveOption> legalMoves;
   final List<PieceData> whiteCaptured;
@@ -40,6 +42,7 @@ class GameState {
     PieceSide? turn,
     GameStatus? status,
     GameMode? mode,
+    Map<SquarePosition, List<MoveOption>>? legalMovesByOrigin,
     SquarePosition? selectedSquare,
     bool clearSelectedSquare = false,
     List<MoveOption>? legalMoves,
@@ -57,6 +60,7 @@ class GameState {
       turn: turn ?? this.turn,
       status: status ?? this.status,
       mode: mode ?? this.mode,
+      legalMovesByOrigin: legalMovesByOrigin ?? this.legalMovesByOrigin,
       selectedSquare: clearSelectedSquare
           ? null
           : selectedSquare ?? this.selectedSquare,

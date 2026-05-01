@@ -63,6 +63,17 @@ class GameController extends Notifier<GameState> {
     );
   }
 
+  Future<void> handleMove(MoveOption move) async {
+    if (state.isAiThinking ||
+        state.pendingPromotionMove != null ||
+        state.status.isGameOver ||
+        state.turn != PieceSide.white) {
+      return;
+    }
+
+    await _playMove(move);
+  }
+
   Future<void> choosePromotion(PromotionChoice choice) async {
     final pendingMove = state.pendingPromotionMove;
     if (pendingMove == null) {
@@ -106,6 +117,7 @@ class GameController extends Notifier<GameState> {
       board: result.snapshot.board,
       turn: result.snapshot.turn,
       status: result.snapshot.status,
+      legalMovesByOrigin: _groupLegalMoves(result.snapshot.fen),
       whiteCaptured: nextWhiteCaptured,
       blackCaptured: nextBlackCaptured,
       clearSelectedSquare: true,
@@ -174,6 +186,7 @@ class GameController extends Notifier<GameState> {
       board: result.snapshot.board,
       turn: result.snapshot.turn,
       status: result.snapshot.status,
+      legalMovesByOrigin: _groupLegalMoves(result.snapshot.fen),
       whiteCaptured: nextWhiteCaptured,
       blackCaptured: nextBlackCaptured,
       isAiThinking: false,
@@ -212,6 +225,20 @@ class GameController extends Notifier<GameState> {
       turn: snapshot.turn,
       status: snapshot.status,
       mode: GameMode.humanVsAi,
+      legalMovesByOrigin: _groupLegalMoves(snapshot.fen),
     );
+  }
+
+  Map<SquarePosition, List<MoveOption>> _groupLegalMoves(String fen) {
+    final grouped = <SquarePosition, List<MoveOption>>{};
+
+    for (final move in _engine.legalMoves(fen)) {
+      grouped.putIfAbsent(move.from, () => <MoveOption>[]).add(move);
+    }
+
+    return {
+      for (final entry in grouped.entries)
+        entry.key: List<MoveOption>.unmodifiable(entry.value),
+    };
   }
 }

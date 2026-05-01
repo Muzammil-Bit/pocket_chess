@@ -36,6 +36,9 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
+  chessground: ^9.0.0
+  dartchess: ^0.12.3
+  fast_immutable_collections: ^11.2.0
 
 dev_dependencies:
   flutter_test:

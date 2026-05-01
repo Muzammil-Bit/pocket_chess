@@ -8,7 +8,10 @@
       "version": "1.0.0+1",
       "dependencies": [
         "chess",
+        "chessground",
         "cupertino_icons",
+        "dartchess",
+        "fast_immutable_collections",
         "flutter",
         "flutter_riverpod"
       ],
@@ -40,6 +43,31 @@
         "stream_channel",
         "test_api",
         "vector_math"
+      ]
+    },
+    {
+      "name": "fast_immutable_collections",
+      "version": "11.2.0",
+      "dependencies": [
+        "collection",
+        "meta"
+      ]
+    },
+    {
+      "name": "dartchess",
+      "version": "0.12.3",
+      "dependencies": [
+        "fast_immutable_collections",
+        "meta"
+      ]
+    },
+    {
+      "name": "chessground",
+      "version": "9.0.0",
+      "dependencies": [
+        "dartchess",
+        "fast_immutable_collections",
+        "flutter"
       ]
     },
     {
