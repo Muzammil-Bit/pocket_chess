@@ -40,6 +40,26 @@ class _PreGameSheetBody extends ConsumerStatefulWidget {
 
 class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
   late GameSession _session;
+  bool _isStarting = false;
+
+  Future<void> _onStartGame() async {
+    if (_isStarting) {
+      return;
+    }
+    setState(() => _isStarting = true);
+    try {
+      await ref.read(gameControllerProvider.notifier).startSession(_session);
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isStarting = false);
+      }
+      return;
+    }
+    if (!mounted) {
+      return;
+    }
+    Navigator.of(context).pop(_session);
+  }
 
   @override
   void initState() {
@@ -62,156 +82,170 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Center(
-                  child: Container(
-                    width: 42,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colors.textMuted.withValues(alpha: 0.35),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'New match',
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                        ),
+        child: AbsorbPointer(
+          absorbing: _isStarting,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: colors.textMuted.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(999),
                       ),
                     ),
-                    _GlassButton(
-                      onTap: () {
-                        Navigator.of(
-                          context,
-                        ).pushNamed(HistoryScreen.routeName);
-                      },
-                      icon: Icons.history_rounded,
-                      label: 'History',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Choose your game mode and configure the engine.',
-                  style: TextStyle(color: colors.textMuted, fontSize: 13),
-                ),
-                const SizedBox(height: 24),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'New match',
+                          style: theme.textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      _GlassButton(
+                        onTap: () {
+                          Navigator.of(
+                            context,
+                          ).pushNamed(HistoryScreen.routeName);
+                        },
+                        icon: Icons.history_rounded,
+                        label: 'History',
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Choose your game mode and configure the engine.',
+                    style: TextStyle(color: colors.textMuted, fontSize: 13),
+                  ),
+                  const SizedBox(height: 24),
 
-                _ModeSelector(
-                  selected: _session.mode,
-                  onChanged: (mode) {
-                    setState(() {
-                      _session = _sessionForMode(mode);
-                    });
-                  },
-                ),
-                const SizedBox(height: 20),
-
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  alignment: Alignment.topCenter,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 250),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    layoutBuilder: (currentChild, previousChildren) {
-                      return Stack(
-                        alignment: Alignment.topCenter,
-                        children: [
-                          ...previousChildren,
-                          if (currentChild != null) currentChild,
-                        ],
-                      );
+                  _ModeSelector(
+                    selected: _session.mode,
+                    onChanged: (mode) {
+                      setState(() {
+                        _session = _sessionForMode(mode);
+                      });
                     },
-                    child: _buildModeContent(),
                   ),
-                ),
+                  const SizedBox(height: 20),
 
-                if (!widget.stockfishSupported) ...[
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.amber.withValues(alpha: 0.2),
-                      ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    alignment: Alignment.topCenter,
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      switchInCurve: Curves.easeOut,
+                      switchOutCurve: Curves.easeIn,
+                      layoutBuilder: (currentChild, previousChildren) {
+                        return Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            ...previousChildren,
+                            if (currentChild != null) currentChild,
+                          ],
+                        );
+                      },
+                      child: _buildModeContent(),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.info_outline_rounded,
-                          size: 18,
-                          color: Colors.amber.withValues(alpha: 0.7),
+                  ),
+
+                  if (!widget.stockfishSupported) ...[
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.amber.withValues(alpha: 0.2),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Stockfish is only available on Android & iOS. '
-                            'This device will use minimax.',
-                            style: TextStyle(
-                              color: colors.textMuted,
-                              fontSize: 12,
-                              height: 1.4,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline_rounded,
+                            size: 18,
+                            color: Colors.amber.withValues(alpha: 0.7),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(
+                              'Stockfish is only available on Android & iOS. '
+                              'This device will use minimax.',
+                              style: TextStyle(
+                                color: colors.textMuted,
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: colors.textMuted,
-                          side: BorderSide(color: colors.panelBorder),
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: FilledButton.icon(
-                        onPressed: () => Navigator.of(context).pop(_session),
-                        style: FilledButton.styleFrom(
-                          backgroundColor: colors.accentPrimary,
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                        ),
-                        icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                        label: const Text(
-                          'Start game',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
+                        ],
                       ),
                     ),
                   ],
-                ),
-              ],
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: _isStarting
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: colors.textMuted,
+                            side: BorderSide(color: colors.panelBorder),
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: const Text('Cancel'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton.icon(
+                          onPressed: _onStartGame,
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.accentPrimary,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: _isStarting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.25,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Icon(Icons.play_arrow_rounded, size: 20),
+                          label: Text(
+                            _isStarting ? 'Starting...' : 'Start game',
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

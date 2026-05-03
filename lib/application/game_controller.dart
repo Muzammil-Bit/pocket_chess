@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../domain/engine/chess_engine.dart';
+import '../domain/models/game_mode.dart';
 import '../domain/models/game_session.dart';
 import '../domain/models/game_snapshot.dart';
 import '../domain/models/game_status.dart';
@@ -128,7 +129,12 @@ class GameController extends Notifier<GameState> {
     state = _stateFromSnapshot(snapshot, session: session);
     await _recorder.startRecording(session: session, initialFen: snapshot.fen);
     _refreshHistory();
-    await _maybeRunAiTurns(expectedToken: _sessionToken);
+    final token = _sessionToken;
+    if (session.mode == GameMode.aiVsAi) {
+      Future<void>.microtask(() => _maybeRunAiTurns(expectedToken: token));
+    } else {
+      await _maybeRunAiTurns(expectedToken: token);
+    }
   }
 
   bool _canAcceptInput() {
@@ -235,10 +241,9 @@ class GameController extends Notifier<GameState> {
         }
       }
 
-      final aiMove = await _aiStrategies.forConfig(aiConfig).chooseMove(
-        fen: state.fen,
-        config: aiConfig,
-      );
+      final aiMove = await _aiStrategies
+          .forConfig(aiConfig)
+          .chooseMove(fen: state.fen, config: aiConfig);
       if (expectedToken != _sessionToken) {
         return;
       }
@@ -276,7 +281,8 @@ class GameController extends Notifier<GameState> {
 
   MoveOption? _matchingMoveFor(AiMove aiMove) {
     for (final move in _engine.legalMoves(state.fen)) {
-      if (move.from.algebraic != aiMove.from || move.to.algebraic != aiMove.to) {
+      if (move.from.algebraic != aiMove.from ||
+          move.to.algebraic != aiMove.to) {
         continue;
       }
       if (_promotionCode(move.promotion) != aiMove.promotion &&
@@ -307,7 +313,9 @@ class GameController extends Notifier<GameState> {
 
     final fullMove = int.tryParse(parts[5]) ?? 1;
     final sideToMove = parts[1];
-    return sideToMove == 'w' ? ((fullMove - 1) * 2) : (((fullMove - 1) * 2) + 1);
+    return sideToMove == 'w'
+        ? ((fullMove - 1) * 2)
+        : (((fullMove - 1) * 2) + 1);
   }
 
   String? _promotionCode(PromotionChoice? promotion) {

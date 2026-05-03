@@ -1,9 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../application/providers.dart';
 import 'app_colors.dart';
 import 'game_screen.dart';
 import 'history_screen.dart';
@@ -65,7 +65,9 @@ class StartScreen extends ConsumerWidget {
                                 offset: const Offset(0, -28),
                                 child: _HeroContent(
                                   onPlay: () {
-                                    _startGame(context, ref);
+                                    unawaited(
+                                      _openPreGameAndNavigate(context, ref),
+                                    );
                                   },
                                 ),
                               ),
@@ -96,19 +98,17 @@ class StartScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Future<void> _startGame(BuildContext context, WidgetRef ref) async {
-    final session = await showPreGameSheet(context, ref: ref);
-    if (session == null || !context.mounted) {
-      return;
-    }
-
-    await ref.read(gameControllerProvider.notifier).startSession(session);
-    if (!context.mounted) {
-      return;
-    }
-    Navigator.of(context).pushNamed(GameScreen.routeName);
+Future<void> _openPreGameAndNavigate(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  final session = await showPreGameSheet(context, ref: ref);
+  if (session == null || !context.mounted) {
+    return;
   }
+  Navigator.of(context).pushNamed(GameScreen.routeName);
 }
 
 class _TopBar extends StatelessWidget {
@@ -442,10 +442,7 @@ class _PlayButtonState extends State<_PlayButton> {
 
         return GestureDetector(
           onTapDown: (_) => setState(() => _isPressed = true),
-          onTapUp: (_) {
-            setState(() => _isPressed = false);
-            widget.onPressed();
-          },
+          onTapUp: (_) => setState(() => _isPressed = false),
           onTapCancel: () => setState(() => _isPressed = false),
           child: AnimatedScale(
             scale: _isPressed ? 0.95 : 1.0,
