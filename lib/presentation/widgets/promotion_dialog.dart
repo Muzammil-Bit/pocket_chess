@@ -18,7 +18,10 @@ class _PromotionDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Choose a promotion'),
+      title: const Text(
+        'Choose a promotion',
+        style: TextStyle(fontWeight: FontWeight.w700),
+      ),
       content: Wrap(
         spacing: 12,
         runSpacing: 12,
@@ -31,13 +34,17 @@ class _PromotionDialog extends StatelessWidget {
                 width: 64,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF4EFE7),
+                  color: const Color(0xFF20274D),
                   borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF39427A)),
                 ),
                 child: Center(
                   child: Text(
                     _pieceGlyph(choice),
-                    style: const TextStyle(fontSize: 40),
+                    style: const TextStyle(
+                      fontSize: 40,
+                      color: Color(0xFFF5F7FF),
+                    ),
                   ),
                 ),
               ),

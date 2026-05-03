@@ -8,22 +8,49 @@ class ChessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ThemeData(
-      useMaterial3: true,
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF234E52),
-        brightness: Brightness.light,
+    const background = Color(0xFF0D1023);
+    const panel = Color(0xFF171B35);
+    const outline = Color(0xFF313767);
+    const primary = Color(0xFF4B58FF);
+    const text = Color(0xFFF5F7FF);
+    const muted = Color(0xFFA8B0D8);
+
+    final base = ThemeData.dark(useMaterial3: true);
+    final theme = base.copyWith(
+      scaffoldBackgroundColor: background,
+      colorScheme: const ColorScheme.dark(
+        primary: primary,
+        secondary: Color(0xFF7A84FF),
+        surface: panel,
+        onPrimary: text,
+        onSecondary: text,
+        onSurface: text,
+        error: Color(0xFFFF6D8A),
+        onError: text,
       ),
-      scaffoldBackgroundColor: const Color(0xFFF4EFE7),
-      textTheme: Theme.of(context).textTheme.apply(
-        bodyColor: const Color(0xFF1E2A2F),
-        displayColor: const Color(0xFF1E2A2F),
-      ),
+      textTheme: base.textTheme
+          .apply(bodyColor: text, displayColor: text)
+          .copyWith(
+            bodyMedium: base.textTheme.bodyMedium?.copyWith(
+              color: muted,
+              height: 1.45,
+            ),
+            titleLarge: base.textTheme.titleLarge?.copyWith(
+              color: text,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.4,
+            ),
+          ),
       cardTheme: CardThemeData(
         elevation: 0,
-        color: Colors.white.withValues(alpha: 0.85),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        color: panel.withValues(alpha: 0.92),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
       ),
+      dialogTheme: DialogThemeData(
+        backgroundColor: const Color(0xFF151935),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      ),
+      dividerColor: outline.withValues(alpha: 0.5),
     );
 
     return MaterialApp(

@@ -24,6 +24,7 @@ void main() {
     expect(find.byKey(const Key('start-game-button')), findsOneWidget);
     expect(find.text('Pocket Chess'), findsOneWidget);
 
+    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
     await tester.tap(find.byKey(const Key('start-game-button')));
     await tester.pumpAndSettle();
 
@@ -35,10 +36,13 @@ void main() {
     'board renders on the dedicated game page and selecting a piece keeps the game screen alive',
     (WidgetTester tester) async {
       await tester.pumpWidget(const ProviderScope(child: ChessApp()));
+      await tester.ensureVisible(find.byKey(const Key('start-game-button')));
       await tester.tap(find.byKey(const Key('start-game-button')));
       await tester.pumpAndSettle();
 
-      final boardRect = tester.getRect(find.byKey(const Key('chessground-board')));
+      final boardRect = tester.getRect(
+        find.byKey(const Key('chessground-board')),
+      );
       await tester.tapAt(squareCenter(boardRect, 'e2'));
       await tester.pump();
 
@@ -49,6 +53,7 @@ void main() {
 
   testWidgets('reset restores the starting state', (WidgetTester tester) async {
     await tester.pumpWidget(const ProviderScope(child: ChessApp()));
+    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
     await tester.tap(find.byKey(const Key('start-game-button')));
     await tester.pumpAndSettle();
 
@@ -59,10 +64,11 @@ void main() {
     await tester.tapAt(squareCenter(boardRect, 'e4'));
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Restart'));
     await tester.tap(find.text('Restart'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Turn: White'), findsOneWidget);
+    expect(find.text('Your move'), findsOneWidget);
     expect(find.byKey(const Key('chessground-board')), findsOneWidget);
   });
 }

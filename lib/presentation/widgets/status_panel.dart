@@ -18,30 +18,46 @@ class StatusPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusText = _statusText();
+    final turnText = turn == PieceSide.white ? 'Your move' : 'Computer move';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+    return Container(
+      key: const Key('status-panel'),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF171B35).withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: const Color(0xFF2D3361)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Visibility(
-            visible: statusText != null,
-            maintainState: true,
-            maintainAnimation: true,
-            maintainSize: true,
-            child: _StatusBadge(
-              label: statusText ?? ' ',
-              isThinking: isAiThinking,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            'Turn: ${turn == PieceSide.white ? 'White' : 'Black'}',
-            key: const Key('turn-label'),
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          if (statusText != null)
+            _StatusBadge(label: statusText, isThinking: isAiThinking),
+          if (statusText != null) const SizedBox(height: 12),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: turn == PieceSide.white
+                      ? const Color(0xFFEEF2FF)
+                      : const Color(0xFF616BBA),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                turnText,
+                key: const Key('turn-label'),
+                style: const TextStyle(
+                  color: Color(0xFFF4F6FF),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -69,7 +85,7 @@ class StatusPanel extends StatelessWidget {
       return '${turn == PieceSide.white ? 'White' : 'Black'} is in check';
     }
 
-    return null;
+    return 'Match in progress';
   }
 }
 
@@ -83,10 +99,15 @@ class _StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const Key('status-badge'),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isThinking ? const Color(0xFFDDECE7) : const Color(0xFFF0E4C6),
-        borderRadius: BorderRadius.circular(18),
+        color: isThinking
+            ? const Color(0xFF2A3060)
+            : const Color(0xFF20274D).withValues(alpha: 0.96),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isThinking ? const Color(0xFF6876FF) : const Color(0xFF3A4278),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -94,15 +115,17 @@ class _StatusBadge extends StatelessWidget {
           Icon(
             isThinking ? Icons.psychology_alt_outlined : Icons.flag_outlined,
             size: 18,
+            color: const Color(0xFFDDE2FF),
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               label,
               key: const Key('status-text'),
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Color(0xFFEFF2FF),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],

@@ -37,27 +37,27 @@ class ChessBoard extends StatelessWidget {
       lastMove: _normalMoveFrom(lastMove),
       settings: const ChessboardSettings(
         colorScheme: ChessboardColorScheme(
-          lightSquare: Color(0xFFE8D8BE),
-          darkSquare: Color(0xFF7B5B47),
+          lightSquare: Color(0xFFF3F4FB),
+          darkSquare: Color(0xFF9198B5),
           background: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFE8D8BE),
-            darkSquare: Color(0xFF7B5B47),
+            lightSquare: Color(0xFFF3F4FB),
+            darkSquare: Color(0xFF9198B5),
           ),
           whiteCoordBackground: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFE8D8BE),
-            darkSquare: Color(0xFF7B5B47),
+            lightSquare: Color(0xFFF3F4FB),
+            darkSquare: Color(0xFF9198B5),
             coordinates: true,
           ),
           blackCoordBackground: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFE8D8BE),
-            darkSquare: Color(0xFF7B5B47),
+            lightSquare: Color(0xFFF3F4FB),
+            darkSquare: Color(0xFF9198B5),
             coordinates: true,
             orientation: dc.Side.black,
           ),
-          lastMove: HighlightDetails(solidColor: Color(0x8CF3C969)),
-          selected: HighlightDetails(solidColor: Color(0xB33BA58A)),
-          validMoves: Color(0xCC2A7B65),
-          validPremoves: Color(0x992A7B65),
+          lastMove: HighlightDetails(solidColor: Color(0x8C6270FF)),
+          selected: HighlightDetails(solidColor: Color(0xAA4B58FF)),
+          validMoves: Color(0xCC4B58FF),
+          validPremoves: Color(0x994B58FF),
         ),
         animationDuration: Duration(milliseconds: 180),
         dragTargetKind: DragTargetKind.circle,
@@ -73,7 +73,11 @@ class ChessBoard extends StatelessWidget {
         promotionMove: null,
         isCheck: isCheck,
         onMove: (move, {bool? viaDragAndDrop}) {
-          if (move case dc.NormalMove(:final from, :final to, :final promotion)) {
+          if (move case dc.NormalMove(
+            :final from,
+            :final to,
+            :final promotion,
+          )) {
             onMove(
               MoveOption(
                 from: SquarePosition.fromAlgebraic(from.name),
