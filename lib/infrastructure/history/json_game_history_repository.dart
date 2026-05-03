@@ -110,6 +110,15 @@ class JsonGameHistoryRepository implements GameHistoryRepository {
     return games.map((game) => game.header).toList(growable: false);
   }
 
+  @override
+  Future<void> deleteGame(String gameId) {
+    return _updateGames((games) {
+      return games
+          .where((game) => game.header.id != gameId)
+          .toList(growable: false);
+    });
+  }
+
   Future<File> _historyFile() async {
     final directory = await getApplicationDocumentsDirectory();
     return File('${directory.path}/pocket_chess_history.json');

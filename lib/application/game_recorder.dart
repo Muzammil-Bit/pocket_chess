@@ -55,9 +55,17 @@ class GameRecorder {
   }
 
   Future<void> abandonIfActive({String? finalFen}) {
-    return finalize(
-      result: SavedGameResultKind.abandoned,
-      finalFen: finalFen,
-    );
+    return finalize(result: SavedGameResultKind.abandoned, finalFen: finalFen);
+  }
+
+  Future<void> discardActiveRecording() async {
+    final activeGameId = _activeGameId;
+    if (activeGameId == null || _isFinalized) {
+      return;
+    }
+
+    _isFinalized = true;
+    _activeGameId = null;
+    await _repository.deleteGame(activeGameId);
   }
 }

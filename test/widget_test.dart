@@ -58,6 +58,9 @@ class _MemoryGameHistoryRepository implements GameHistoryRepository {
 
   @override
   Future<List<SavedGameHeader>> loadHeaders() async => const [];
+
+  @override
+  Future<void> deleteGame(String gameId) async {}
 }
 
 void main() {
@@ -166,7 +169,7 @@ void main() {
 
     await tapAndPump(tester, find.byKey(const Key('open-history-button')));
 
-    expect(find.text('Previous games'), findsOneWidget);
+    expect(find.text('Game History'), findsOneWidget);
   });
 
   testWidgets('selecting a theme updates the board piece set', (

@@ -91,6 +91,11 @@ class _MemoryGameHistoryRepository implements GameHistoryRepository {
   Future<List<SavedGameHeader>> loadHeaders() async {
     return _games.values.map((game) => game.header).toList(growable: false);
   }
+
+  @override
+  Future<void> deleteGame(String gameId) async {
+    _games.remove(gameId);
+  }
 }
 
 void main() {

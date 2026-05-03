@@ -9,10 +9,7 @@ abstract class GameHistoryRepository {
     required DateTime startedAt,
   });
 
-  Future<void> appendMove({
-    required String gameId,
-    required RecordedMove move,
-  });
+  Future<void> appendMove({required String gameId, required RecordedMove move});
 
   Future<void> finalizeGame({
     required String gameId,
@@ -25,4 +22,6 @@ abstract class GameHistoryRepository {
   Future<List<SavedGameHeader>> loadHeaders();
 
   Future<SavedGameDetail?> loadGame(String id);
+
+  Future<void> deleteGame(String gameId);
 }

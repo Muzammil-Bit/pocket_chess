@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:chessground/chessground.dart';
@@ -19,13 +20,45 @@ import 'widgets/game_board_shell.dart';
 import 'widgets/game_players_header.dart';
 import 'widgets/promotion_dialog.dart';
 
-class GameScreen extends ConsumerWidget {
+class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
 
   static const routeName = '/game';
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GameScreen> createState() => _GameScreenState();
+}
+
+class _GameScreenState extends ConsumerState<GameScreen> {
+  bool _handlingBack = false;
+
+  Future<void> _handleBackRequest() async {
+    if (_handlingBack) {
+      return;
+    }
+    _handlingBack = true;
+    try {
+      final saveToHistory = await _showLeaveGameDialog(context);
+      if (!mounted) {
+        return;
+      }
+      if (saveToHistory == null) {
+        return;
+      }
+      await ref
+          .read(gameControllerProvider.notifier)
+          .abandonGame(saveToHistory: saveToHistory);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop();
+    } finally {
+      _handlingBack = false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final colors = context.appColors;
 
     ref.listen(
@@ -67,11 +100,12 @@ class GameScreen extends ConsumerWidget {
     final pieceTheme = ref.watch(selectedPieceThemeProvider);
 
     return PopScope<void>(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, _) async {
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
         if (didPop) {
-          await controller.abandonGame();
+          return;
         }
+        unawaited(_handleBackRequest());
       },
       child: Scaffold(
         backgroundColor: colors.gradientColors.first,
@@ -208,6 +242,54 @@ class GameScreen extends ConsumerWidget {
     }
     return PlayerSide.none;
   }
+}
+
+Future<bool?> _showLeaveGameDialog(BuildContext context) {
+  var saveToHistory = false;
+  return showDialog<bool>(
+    context: context,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return AlertDialog(
+            title: const Text('Leave game?'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Are you sure you want to go back? You can leave without saving, '
+                  'or save an abandoned entry to History.',
+                  style: Theme.of(dialogContext).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Save to history'),
+                  subtitle: const Text(
+                    'Keep this session in History as abandoned',
+                  ),
+                  value: saveToHistory,
+                  onChanged: (value) =>
+                      setDialogState(() => saveToHistory = value),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(dialogContext).pop(saveToHistory),
+                child: const Text('Leave'),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
 
 class _ActionRow extends StatelessWidget {

@@ -104,7 +104,7 @@ class GameController extends Notifier<GameState> {
     await _beginNewGame(state.session);
   }
 
-  Future<void> abandonGame() async {
+  Future<void> abandonGame({bool saveToHistory = true}) async {
     _sessionToken++;
     state = state.copyWith(
       isAiThinking: false,
@@ -112,7 +112,12 @@ class GameController extends Notifier<GameState> {
       clearSelectedSquare: true,
       legalMoves: const [],
     );
-    await _recorder.abandonIfActive(finalFen: state.fen);
+    final fen = state.fen;
+    if (saveToHistory) {
+      await _recorder.abandonIfActive(finalFen: fen);
+    } else {
+      await _recorder.discardActiveRecording();
+    }
     _refreshHistory();
   }
 
