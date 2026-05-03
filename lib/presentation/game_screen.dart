@@ -334,22 +334,132 @@ class _TimerPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.appColors;
 
-    return Column(
-      children: [
-        Text(
-          time,
-          style: TextStyle(
-            color: colors.textHeading,
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.6,
+    return SizedBox(
+      width: 72,
+      height: 72,
+      child: CustomPaint(
+        painter: _ClockRingPainter(
+          progress: 1.0,
+          trackColor: colors.panelBorder.withValues(alpha: 0.2),
+          fillColor: colors.activeIndicator,
+          glowColor: colors.activeIndicator.withValues(alpha: 0.3),
+        ),
+        child: Center(
+          child: Text(
+            time,
+            style: TextStyle(
+              color: colors.textHeading,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.3,
+            ),
           ),
         ),
-        const SizedBox(height: 4),
-        Text('Timer', style: TextStyle(color: colors.textMuted, fontSize: 12)),
-      ],
+      ),
     );
   }
+}
+
+class _ClockRingPainter extends CustomPainter {
+  _ClockRingPainter({
+    required this.progress,
+    required this.trackColor,
+    required this.fillColor,
+    required this.glowColor,
+  });
+
+  final double progress;
+  final Color trackColor;
+  final Color fillColor;
+  final Color glowColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (math.min(size.width, size.height) / 2) - 4;
+    const strokeWidth = 3.5;
+    const startAngle = -math.pi / 2;
+
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, trackPaint);
+
+    if (progress > 0) {
+      final sweepAngle = 2 * math.pi * progress;
+
+      final glowPaint = Paint()
+        ..color = glowColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth + 4
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
+        glowPaint,
+      );
+
+      final fillPaint = Paint()
+        ..color = fillColor
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        false,
+        fillPaint,
+      );
+    }
+
+    _drawTickMarks(canvas, center, radius, size);
+  }
+
+  void _drawTickMarks(Canvas canvas, Offset center, double radius, Size size) {
+    final tickPaint = Paint()
+      ..color = trackColor
+      ..strokeWidth = 1.0
+      ..strokeCap = StrokeCap.round;
+
+    for (var i = 0; i < 12; i++) {
+      final angle = (i * math.pi / 6) - (math.pi / 2);
+      final isQuarter = i % 3 == 0;
+      final innerRadius = radius - (isQuarter ? 6 : 4);
+      final outerRadius = radius - 1;
+
+      if (isQuarter) {
+        tickPaint.strokeWidth = 1.5;
+      } else {
+        tickPaint.strokeWidth = 0.8;
+      }
+
+      final start = Offset(
+        center.dx + innerRadius * math.cos(angle),
+        center.dy + innerRadius * math.sin(angle),
+      );
+      final end = Offset(
+        center.dx + outerRadius * math.cos(angle),
+        center.dy + outerRadius * math.sin(angle),
+      );
+
+      canvas.drawLine(start, end, tickPaint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ClockRingPainter oldDelegate) =>
+      oldDelegate.progress != progress ||
+      oldDelegate.trackColor != trackColor ||
+      oldDelegate.fillColor != fillColor;
 }
 
 class _PieceStrip extends StatelessWidget {
