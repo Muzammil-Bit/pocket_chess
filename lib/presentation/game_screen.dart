@@ -445,10 +445,13 @@ class _BoardFrame extends StatelessWidget {
                     color: const Color(0x2610152D),
                     child: Padding(
                       padding: const EdgeInsets.all(boardPadding),
-                      child: SizedBox(
-                        width: boardSize,
-                        height: boardSize,
-                        child: child,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          width: boardSize,
+                          height: boardSize,
+                          child: child,
+                        ),
                       ),
                     ),
                   ),
