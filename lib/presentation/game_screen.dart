@@ -104,36 +104,37 @@ class GameScreen extends ConsumerWidget {
                                   isWhiteTurn: state.turn == PieceSide.white,
                                 ),
                                 const SizedBox(height: 20),
-                                _PieceStrip(
-                                  pieces: state.blackCaptured,
-                                  alignment: Alignment.centerRight,
-                                  theme: pieceTheme,
-                                ),
-                                const SizedBox(height: 16),
-                                _BoardFrame(
+                                _BoardStage(
                                   boardSize: boardSize,
-                                  child: ChessBoard(
-                                    fen: state.fen,
-                                    boardSize: boardSize,
-                                    pieceAssets: pieceTheme.boardAssets,
-                                    validMovesByOrigin:
-                                        state.legalMovesByOrigin,
-                                    isInteractive:
-                                        !state.isAiThinking &&
-                                        state.pendingPromotionMove == null &&
-                                        !state.status.isGameOver &&
-                                        state.turn == PieceSide.white,
-                                    isCheck: state.status.inCheck,
-                                    lastMove: state.lastMove,
-                                    onMove: (move) =>
-                                        controller.handleMove(move),
+                                  topStrip: _PieceStrip(
+                                    pieces: state.blackCaptured,
+                                    alignment: Alignment.centerRight,
+                                    theme: pieceTheme,
                                   ),
-                                ),
-                                const SizedBox(height: 16),
-                                _PieceStrip(
-                                  pieces: state.whiteCaptured,
-                                  alignment: Alignment.centerRight,
-                                  theme: pieceTheme,
+                                  board: _BoardFrame(
+                                    boardSize: boardSize,
+                                    child: ChessBoard(
+                                      fen: state.fen,
+                                      boardSize: boardSize,
+                                      pieceAssets: pieceTheme.boardAssets,
+                                      validMovesByOrigin:
+                                          state.legalMovesByOrigin,
+                                      isInteractive:
+                                          !state.isAiThinking &&
+                                          state.pendingPromotionMove == null &&
+                                          !state.status.isGameOver &&
+                                          state.turn == PieceSide.white,
+                                      isCheck: state.status.inCheck,
+                                      lastMove: state.lastMove,
+                                      onMove: (move) =>
+                                          controller.handleMove(move),
+                                    ),
+                                  ),
+                                  bottomStrip: _PieceStrip(
+                                    pieces: state.whiteCaptured,
+                                    alignment: Alignment.centerRight,
+                                    theme: pieceTheme,
+                                  ),
                                 ),
                               ],
                             ),
@@ -345,6 +346,90 @@ class _BoardFrame extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox(width: boardSize, height: boardSize, child: child),
+    );
+  }
+}
+
+class _BoardStage extends StatelessWidget {
+  const _BoardStage({
+    required this.boardSize,
+    required this.topStrip,
+    required this.board,
+    required this.bottomStrip,
+  });
+
+  final double boardSize;
+  final Widget topStrip;
+  final Widget board;
+  final Widget bottomStrip;
+
+  @override
+  Widget build(BuildContext context) {
+    final glowWidth = math.min(boardSize + 64, 620.0);
+
+    return Center(
+      child: SizedBox(
+        width: glowWidth,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            const Positioned.fill(
+              child: IgnorePointer(
+                child: _BoardStageGlow(),
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                topStrip,
+                const SizedBox(height: 16),
+                board,
+                const SizedBox(height: 16),
+                bottomStrip,
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BoardStageGlow extends StatelessWidget {
+  const _BoardStageGlow();
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: Alignment.center,
+          radius: 1.08,
+          colors: [
+            const Color(0x666F7DFF),
+            const Color(0x386276FF),
+            const Color(0x0B3D4D8D),
+            const Color(0x00333D7A),
+          ],
+          stops: const [0.0, 0.38, 0.72, 1.0],
+        ),
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              const Color(0x003A4CFF),
+              const Color(0x185667A8),
+              const Color(0x3E6C7FFF),
+              const Color(0x185667A8),
+              const Color(0x003A4CFF),
+            ],
+            stops: const [0.0, 0.18, 0.5, 0.82, 1.0],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+        ),
+      ),
     );
   }
 }
