@@ -6,10 +6,75 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pocket_chess/app.dart';
 import 'package:pocket_chess/application/app_settings_controller.dart';
+import 'package:pocket_chess/application/game_history_repository.dart';
 import 'package:pocket_chess/application/piece_theme_catalog.dart';
+import 'package:pocket_chess/application/providers.dart';
+import 'package:pocket_chess/domain/models/game_session.dart';
+import 'package:pocket_chess/domain/models/piece_data.dart';
 import 'package:pocket_chess/domain/models/piece_theme_option.dart';
+import 'package:pocket_chess/domain/models/saved_game.dart';
+
+class _MemoryGameHistoryRepository implements GameHistoryRepository {
+  @override
+  Future<void> appendMove({
+    required String gameId,
+    required RecordedMove move,
+  }) async {}
+
+  @override
+  Future<SavedGameDetail> createGame({
+    required GameSession session,
+    required String initialFen,
+    required DateTime startedAt,
+  }) async {
+    return SavedGameDetail(
+      header: SavedGameHeader(
+        id: 'game-1',
+        startedAt: startedAt,
+        completedAt: null,
+        mode: session.mode,
+        session: session,
+        configSummary: session.summary,
+        result: SavedGameResultKind.abandoned,
+        winner: null,
+        moveCount: 0,
+      ),
+      moves: const [],
+      finalFen: initialFen,
+    );
+  }
+
+  @override
+  Future<void> finalizeGame({
+    required String gameId,
+    required SavedGameResultKind result,
+    required DateTime completedAt,
+    PieceSide? winner,
+    String? finalFen,
+  }) async {}
+
+  @override
+  Future<SavedGameDetail?> loadGame(String id) async => null;
+
+  @override
+  Future<List<SavedGameHeader>> loadHeaders() async => const [];
+}
 
 void main() {
+  Future<void> pumpUi(WidgetTester tester, [Duration? duration]) {
+    return tester.pump(duration ?? const Duration(milliseconds: 700));
+  }
+
+  Future<void> tapAndPump(
+    WidgetTester tester,
+    Finder finder, {
+    Duration duration = const Duration(seconds: 1),
+  }) async {
+    await tester.tap(finder);
+    await tester.pump();
+    await tester.pump(duration);
+  }
+
   Offset squareCenter(Rect rect, String algebraic) {
     final file = algebraic.codeUnitAt(0) - 97;
     final rank = int.parse(algebraic[1]);
@@ -33,6 +98,9 @@ void main() {
       ProviderScope(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(preferences),
+          gameHistoryRepositoryProvider.overrideWithValue(
+            _MemoryGameHistoryRepository(),
+          ),
           availablePieceThemesProvider.overrideWith(
             (ref) async => availableThemes,
           ),
@@ -40,10 +108,17 @@ void main() {
         child: const ChessApp(),
       ),
     );
-    await tester.pumpAndSettle();
+    await pumpUi(tester, const Duration(milliseconds: 1200));
   }
 
-  testWidgets('landing page opens the dedicated game page', (
+  Future<void> startDefaultGame(WidgetTester tester) async {
+    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
+    await tapAndPump(tester, find.byKey(const Key('start-game-button')));
+    expect(find.text('New match'), findsOneWidget);
+    await tapAndPump(tester, find.text('Start game'));
+  }
+
+  testWidgets('landing page opens the setup sheet before the game page', (
     WidgetTester tester,
   ) async {
     SharedPreferences.setMockInitialValues({});
@@ -53,11 +128,14 @@ void main() {
 
     expect(find.byKey(const Key('start-screen')), findsOneWidget);
     expect(find.byKey(const Key('start-game-button')), findsOneWidget);
-    expect(find.text('Pocket Chess'), findsWidgets);
+    expect(find.text('Pocket\nChess'), findsOneWidget);
 
-    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
-    await tester.tap(find.byKey(const Key('start-game-button')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('start-game-button')));
+
+    expect(find.text('New match'), findsOneWidget);
+    expect(find.text('Start game'), findsOneWidget);
+
+    await tapAndPump(tester, find.text('Start game'));
 
     expect(find.byKey(const Key('chessground-board')), findsOneWidget);
     expect(find.byType(Chessboard), findsOneWidget);
@@ -71,12 +149,24 @@ void main() {
 
     await pumpChessApp(tester, preferences);
 
-    await tester.tap(find.byKey(const Key('open-settings-button')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
 
     expect(find.text('Settings'), findsOneWidget);
     expect(find.byKey(const Key('piece-theme-cburnett')), findsOneWidget);
     expect(find.byKey(const Key('piece-theme-maestro')), findsOneWidget);
+  });
+
+  testWidgets('history screen opens from the landing page', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await pumpChessApp(tester, preferences);
+
+    await tapAndPump(tester, find.byKey(const Key('open-history-button')));
+
+    expect(find.text('Previous games'), findsOneWidget);
   });
 
   testWidgets('selecting a theme updates the board piece set', (
@@ -87,16 +177,13 @@ void main() {
 
     await pumpChessApp(tester, preferences);
 
-    await tester.tap(find.byKey(const Key('open-settings-button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('piece-theme-maestro')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
+    await tapAndPump(tester, find.byKey(const Key('piece-theme-maestro')));
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await pumpUi(tester);
 
-    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
-    await tester.tap(find.byKey(const Key('start-game-button')));
-    await tester.pumpAndSettle();
+    await startDefaultGame(tester);
 
     final board = tester.widget<Chessboard>(find.byType(Chessboard));
     expect(board.settings.pieceAssets, PieceSet.maestro.assets);
@@ -110,17 +197,14 @@ void main() {
 
     await pumpChessApp(tester, preferences);
 
-    await tester.tap(find.byKey(const Key('open-settings-button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('piece-theme-maestro')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
+    await tapAndPump(tester, find.byKey(const Key('piece-theme-maestro')));
 
     await tester.pumpWidget(const SizedBox.shrink());
-    await tester.pumpAndSettle();
+    await pumpUi(tester);
 
     await pumpChessApp(tester, preferences);
-    await tester.tap(find.byKey(const Key('open-settings-button')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
 
     expect(
       find.descendant(
@@ -139,27 +223,22 @@ void main() {
 
     await pumpChessApp(tester, preferences);
 
-    await tester.tap(find.byKey(const Key('open-settings-button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('piece-theme-maestro')));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
+    await tapAndPump(tester, find.byKey(const Key('piece-theme-maestro')));
     await tester.pageBack();
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await pumpUi(tester);
 
-    await tester.ensureVisible(find.byKey(const Key('start-game-button')));
-    await tester.tap(find.byKey(const Key('start-game-button')));
-    await tester.pumpAndSettle();
+    await startDefaultGame(tester);
 
     final boardFinder = find.byKey(const Key('chessground-board'));
     final boardRect = tester.getRect(boardFinder);
     await tester.tapAt(squareCenter(boardRect, 'e2'));
     await tester.pump();
     await tester.tapAt(squareCenter(boardRect, 'e4'));
-    await tester.pumpAndSettle();
+    await pumpUi(tester, const Duration(seconds: 1));
 
-    await tester.ensureVisible(find.text('Restart'));
-    await tester.tap(find.text('Restart'));
-    await tester.pumpAndSettle();
+    await tapAndPump(tester, find.text('Restart'));
 
     final board = tester.widget<Chessboard>(find.byType(Chessboard));
     expect(board.settings.pieceAssets, PieceSet.maestro.assets);

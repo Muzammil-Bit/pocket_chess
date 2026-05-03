@@ -23,6 +23,9 @@ class PackageChessEngine implements ChessEngine {
       return null;
     }
 
+    final san = game.move_to_san(candidate);
+    final uci = _uciFromMove(candidate);
+
     final applied = game.move({
       'from': candidate.fromAlgebraic,
       'to': candidate.toAlgebraic,
@@ -35,6 +38,8 @@ class PackageChessEngine implements ChessEngine {
     return MoveResult(
       snapshot: _snapshotFromGame(game),
       move: _moveOptionFromMove(candidate),
+      san: san,
+      uci: uci,
       capturedPiece: _capturedPiece(candidate),
     );
   }
@@ -172,6 +177,10 @@ class PackageChessEngine implements ChessEngine {
   }
 
   bool _hasFlag(int flags, int target) => (flags & target) != 0;
+
+  String _uciFromMove(chess.Move move) {
+    return '${move.fromAlgebraic}${move.toAlgebraic}${move.promotion?.name ?? ''}';
+  }
 
   GameSnapshot _snapshotFromGame(chess.Chess game) {
     final rows = List.generate(8, (rank) {

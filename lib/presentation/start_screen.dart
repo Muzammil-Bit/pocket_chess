@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/providers.dart';
 import 'app_colors.dart';
 import 'game_screen.dart';
+import 'history_screen.dart';
+import 'pre_game_sheet.dart';
 import 'settings_screen.dart';
 
 class StartScreen extends ConsumerWidget {
@@ -49,6 +51,9 @@ class StartScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   _TopBar(
+                    onHistory: () => Navigator.of(
+                      context,
+                    ).pushNamed(HistoryScreen.routeName),
                     onSettings: () => Navigator.of(
                       context,
                     ).pushNamed(SettingsScreen.routeName),
@@ -58,7 +63,9 @@ class StartScreen extends ConsumerWidget {
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: _HeroContent(
-                          onPlay: () => _startGame(context, ref),
+                          onPlay: () {
+                            _startGame(context, ref);
+                          },
                         ),
                       ),
                     ),
@@ -72,15 +79,24 @@ class StartScreen extends ConsumerWidget {
     );
   }
 
-  void _startGame(BuildContext context, WidgetRef ref) {
-    ref.read(gameControllerProvider.notifier).resetGame();
+  Future<void> _startGame(BuildContext context, WidgetRef ref) async {
+    final session = await showPreGameSheet(context, ref: ref);
+    if (session == null || !context.mounted) {
+      return;
+    }
+
+    await ref.read(gameControllerProvider.notifier).startSession(session);
+    if (!context.mounted) {
+      return;
+    }
     Navigator.of(context).pushNamed(GameScreen.routeName);
   }
 }
 
 class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onSettings});
+  const _TopBar({required this.onHistory, required this.onSettings});
 
+  final VoidCallback onHistory;
   final VoidCallback onSettings;
 
   @override
@@ -91,6 +107,21 @@ class _TopBar extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 8, 8, 0),
       child: Row(
         children: [
+          IconButton(
+            key: const Key('open-history-button'),
+            onPressed: onHistory,
+            icon: Icon(Icons.history_rounded, color: colors.textMuted),
+            tooltip: 'History',
+            style: IconButton.styleFrom(
+              backgroundColor: colors.cardBackground.withValues(alpha: 0.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: BorderSide(
+                  color: colors.cardBorder.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
           const Spacer(),
           IconButton(
             key: const Key('open-settings-button'),
@@ -131,8 +162,6 @@ class _HeroContentState extends State<_HeroContent>
   late final Animation<double> _iconOpacity;
   late final Animation<Offset> _titleSlide;
   late final Animation<double> _titleOpacity;
-  late final Animation<Offset> _subtitleSlide;
-  late final Animation<double> _subtitleOpacity;
   late final Animation<double> _buttonScale;
   late final Animation<double> _buttonOpacity;
 
@@ -173,20 +202,6 @@ class _HeroContentState extends State<_HeroContent>
       CurvedAnimation(
         parent: _entranceController,
         curve: const Interval(0.2, 0.5, curve: Curves.easeOut),
-      ),
-    );
-
-    _subtitleSlide = Tween(begin: const Offset(0, 0.4), end: Offset.zero)
-        .animate(
-          CurvedAnimation(
-            parent: _entranceController,
-            curve: const Interval(0.35, 0.7, curve: Curves.easeOutCubic),
-          ),
-        );
-    _subtitleOpacity = Tween(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.35, 0.6, curve: Curves.easeOut),
       ),
     );
 

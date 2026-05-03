@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'application/app_settings_controller.dart';
 import 'presentation/app_colors.dart';
 import 'presentation/game_screen.dart';
+import 'presentation/history_screen.dart';
 import 'presentation/settings_screen.dart';
 import 'presentation/start_screen.dart';
 
@@ -31,6 +32,12 @@ class ChessApp extends ConsumerWidget {
         if (settings.name == SettingsScreen.routeName) {
           return MaterialPageRoute<void>(
             builder: (_) => const SettingsScreen(),
+            settings: settings,
+          );
+        }
+        if (settings.name == HistoryScreen.routeName) {
+          return MaterialPageRoute<void>(
+            builder: (_) => const HistoryScreen(),
             settings: settings,
           );
         }

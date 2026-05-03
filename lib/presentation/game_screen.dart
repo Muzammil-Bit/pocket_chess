@@ -1,10 +1,14 @@
 import 'dart:math' as math;
 
+import 'package:chessground/chessground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/app_settings_controller.dart';
+import '../application/game_controller.dart';
 import '../application/providers.dart';
+import '../domain/models/game_mode.dart';
+import '../domain/models/game_session.dart';
 import '../domain/models/piece_data.dart';
 import '../domain/models/piece_theme_option.dart';
 import 'app_colors.dart';
@@ -46,142 +50,177 @@ class GameScreen extends ConsumerWidget {
     final controller = ref.read(gameControllerProvider.notifier);
     final pieceTheme = ref.watch(selectedPieceThemeProvider);
 
-    return Scaffold(
-      backgroundColor: colors.gradientColors.first,
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        foregroundColor: colors.textHeading,
-        elevation: 0,
-        title: Text(
-          'Pocket Chess',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-            color: colors.textHeading,
-          ),
-        ),
-        centerTitle: true,
-      ),
-      body: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: colors.gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -40,
-              right: -10,
-              child: _GlowOrb(size: 240, color: colors.glowOrbPrimary),
+    return PopScope<void>(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) {
+          await controller.abandonGame();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: colors.gradientColors.first,
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          foregroundColor: colors.textHeading,
+          elevation: 0,
+          title: Text(
+            'Pocket Chess',
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: colors.textHeading,
             ),
-            Positioned(
-              bottom: 100,
-              left: -30,
-              child: _GlowOrb(size: 220, color: colors.glowOrbSecondary),
+          ),
+          centerTitle: true,
+        ),
+        body: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: colors.gradientColors,
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const Positioned.fill(child: _BoardBackdrop()),
-            SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  const screenPadding = 6.0;
-                  const boardFrameAllowance = 50.0;
-                  final boardSize = math.min(
-                    (constraints.maxWidth -
-                            (screenPadding * 2) -
-                            boardFrameAllowance)
-                        .clamp(240.0, 520.0),
-                    (constraints.maxHeight - 280 - boardFrameAllowance).clamp(
-                      240.0,
-                      520.0,
-                    ),
-                  );
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -40,
+                right: -10,
+                child: _GlowOrb(size: 240, color: colors.glowOrbPrimary),
+              ),
+              Positioned(
+                bottom: 100,
+                left: -30,
+                child: _GlowOrb(size: 220, color: colors.glowOrbSecondary),
+              ),
+              const Positioned.fill(child: _BoardBackdrop()),
+              SafeArea(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    const screenPadding = 6.0;
+                    const boardFrameAllowance = 50.0;
+                    final boardSize = math.min(
+                      (constraints.maxWidth -
+                              (screenPadding * 2) -
+                              boardFrameAllowance)
+                          .clamp(240.0, 520.0),
+                      (constraints.maxHeight - 280 - boardFrameAllowance)
+                          .clamp(240.0, 520.0),
+                    );
 
-                  return SingleChildScrollView(
-                    padding: const EdgeInsets.all(screenPadding),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: 620,
-                          minHeight:
-                              constraints.maxHeight - (screenPadding * 2),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                const SizedBox(height: 20),
-                                _PlayersRow(
-                                  isWhiteTurn: state.turn == PieceSide.white,
-                                ),
-                                const SizedBox(height: 20),
-                                _BoardStage(
-                                  boardSize: boardSize,
-                                  topStrip: _PieceStrip(
-                                    pieces: state.blackCaptured,
-                                    alignment: Alignment.centerRight,
-                                    theme: pieceTheme,
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.all(screenPadding),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: 620,
+                            minHeight:
+                                constraints.maxHeight - (screenPadding * 2),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const SizedBox(height: 20),
+                                  _PlayersRow(
+                                    session: state.session,
+                                    activeSide: state.turn,
                                   ),
-                                  board: _BoardFrame(
+                                  const SizedBox(height: 20),
+                                  _BoardStage(
                                     boardSize: boardSize,
-                                    child: ChessBoard(
-                                      fen: state.fen,
+                                    topStrip: _PieceStrip(
+                                      pieces: state.blackCaptured,
+                                      alignment: Alignment.centerRight,
+                                      theme: pieceTheme,
+                                    ),
+                                    board: _BoardFrame(
                                       boardSize: boardSize,
-                                      pieceAssets: pieceTheme.boardAssets,
-                                      validMovesByOrigin:
-                                          state.legalMovesByOrigin,
-                                      isInteractive:
-                                          !state.isAiThinking &&
-                                          state.pendingPromotionMove == null &&
-                                          !state.status.isGameOver &&
-                                          state.turn == PieceSide.white,
-                                      isCheck: state.status.inCheck,
-                                      lastMove: state.lastMove,
-                                      onMove: (move) =>
-                                          controller.handleMove(move),
-                                      lightSquareColor: colors.boardLightSquare,
-                                      darkSquareColor: colors.boardDarkSquare,
-                                      lastMoveHighlight:
-                                          colors.boardLastMoveHighlight,
-                                      selectedHighlight:
-                                          colors.boardSelectedHighlight,
-                                      validMovesColor: colors.boardValidMoveDot,
+                                      child: ChessBoard(
+                                        fen: state.fen,
+                                        boardSize: boardSize,
+                                        pieceAssets: pieceTheme.boardAssets,
+                                        validMovesByOrigin:
+                                            state.legalMovesByOrigin,
+                                        playerSide: _playerSideFor(
+                                          state.session,
+                                          controller,
+                                        ),
+                                        sideToMove: state.turn,
+                                        isCheck: state.status.inCheck,
+                                        lastMove: state.lastMove,
+                                        onMove: (move) =>
+                                            controller.handleMove(move),
+                                        lightSquareColor:
+                                            colors.boardLightSquare,
+                                        darkSquareColor:
+                                            colors.boardDarkSquare,
+                                        lastMoveHighlight:
+                                            colors.boardLastMoveHighlight,
+                                        selectedHighlight:
+                                            colors.boardSelectedHighlight,
+                                        validMovesColor:
+                                            colors.boardValidMoveDot,
+                                      ),
+                                    ),
+                                    bottomStrip: _PieceStrip(
+                                      pieces: state.whiteCaptured,
+                                      alignment: Alignment.centerRight,
+                                      theme: pieceTheme,
                                     ),
                                   ),
-                                  bottomStrip: _PieceStrip(
-                                    pieces: state.whiteCaptured,
-                                    alignment: Alignment.centerRight,
-                                    theme: pieceTheme,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 24),
-                            _ActionRow(onRestart: controller.resetGame),
-                          ],
+                                ],
+                              ),
+                              const SizedBox(height: 24),
+                              _ActionRow(
+                                onRestart: () => controller.resetGame(),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  PlayerSide _playerSideFor(
+    GameSession session,
+    GameController controller,
+  ) {
+    if (!controller.canHumanInteract()) {
+      return PlayerSide.none;
+    }
+    if (session.mode == GameMode.localTwoPlayer) {
+      return PlayerSide.both;
+    }
+    if (session.isHumanControlled(PieceSide.white)) {
+      return PlayerSide.white;
+    }
+    if (session.isHumanControlled(PieceSide.black)) {
+      return PlayerSide.black;
+    }
+    return PlayerSide.none;
+  }
 }
 
 class _PlayersRow extends StatelessWidget {
-  const _PlayersRow({required this.isWhiteTurn});
+  const _PlayersRow({
+    required this.session,
+    required this.activeSide,
+  });
 
-  final bool isWhiteTurn;
+  final GameSession session;
+  final PieceSide activeSide;
 
   @override
   Widget build(BuildContext context) {
@@ -189,10 +228,10 @@ class _PlayersRow extends StatelessWidget {
       children: [
         Expanded(
           child: _PlayerAvatar(
-            label: 'You',
-            initials: 'YU',
+            label: _labelFor(PieceSide.white),
+            initials: _initialsFor(PieceSide.white),
             accent: const Color(0xFFD8E1FF),
-            isActive: isWhiteTurn,
+            isActive: activeSide == PieceSide.white,
             alignment: CrossAxisAlignment.start,
           ),
         ),
@@ -201,15 +240,41 @@ class _PlayersRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _PlayerAvatar(
-            label: 'Computer',
-            initials: 'AI',
+            label: _labelFor(PieceSide.black),
+            initials: _initialsFor(PieceSide.black),
             accent: const Color(0xFFFFD7E1),
-            isActive: !isWhiteTurn,
+            isActive: activeSide == PieceSide.black,
             alignment: CrossAxisAlignment.end,
           ),
         ),
       ],
     );
+  }
+
+  String _labelFor(PieceSide side) {
+    if (session.mode == GameMode.localTwoPlayer) {
+      return side == PieceSide.white ? 'White' : 'Black';
+    }
+    if (session.mode == GameMode.aiVsAi) {
+      return side == PieceSide.white ? 'White AI' : 'Black AI';
+    }
+    if (session.isHumanControlled(side)) {
+      return 'You';
+    }
+    return 'Computer';
+  }
+
+  String _initialsFor(PieceSide side) {
+    if (session.mode == GameMode.localTwoPlayer) {
+      return side == PieceSide.white ? 'WH' : 'BK';
+    }
+    if (session.mode == GameMode.aiVsAi) {
+      return 'AI';
+    }
+    if (session.isHumanControlled(side)) {
+      return 'YU';
+    }
+    return 'AI';
   }
 }
 
@@ -436,11 +501,7 @@ class _ClockRingPainter extends CustomPainter {
       final innerRadius = radius - (isQuarter ? 6 : 4);
       final outerRadius = radius - 1;
 
-      if (isQuarter) {
-        tickPaint.strokeWidth = 1.5;
-      } else {
-        tickPaint.strokeWidth = 0.8;
-      }
+      tickPaint.strokeWidth = isQuarter ? 1.5 : 0.8;
 
       final start = Offset(
         center.dx + innerRadius * math.cos(angle),

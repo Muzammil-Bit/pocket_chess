@@ -1,21 +1,116 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:pocket_chess/application/app_settings_controller.dart';
 import 'package:pocket_chess/application/game_controller.dart';
+import 'package:pocket_chess/application/game_history_repository.dart';
 import 'package:pocket_chess/application/providers.dart';
+import 'package:pocket_chess/domain/models/ai_difficulty.dart';
+import 'package:pocket_chess/domain/models/game_mode.dart';
+import 'package:pocket_chess/domain/models/game_session.dart';
 import 'package:pocket_chess/domain/models/piece_data.dart';
+import 'package:pocket_chess/domain/models/saved_game.dart';
 import 'package:pocket_chess/domain/models/square_position.dart';
 import 'package:pocket_chess/infrastructure/engine/package_chess_engine.dart';
 
+class _MemoryGameHistoryRepository implements GameHistoryRepository {
+  final Map<String, SavedGameDetail> _games = {};
+  int _nextId = 0;
+
+  @override
+  Future<void> appendMove({
+    required String gameId,
+    required RecordedMove move,
+  }) async {
+    final game = _games[gameId];
+    if (game == null) {
+      return;
+    }
+    _games[gameId] = game.copyWith(
+      moves: [...game.moves, move],
+      finalFen: move.fenAfter,
+      header: game.header.copyWith(moveCount: game.moves.length + 1),
+    );
+  }
+
+  @override
+  Future<SavedGameDetail> createGame({
+    required GameSession session,
+    required String initialFen,
+    required DateTime startedAt,
+  }) async {
+    final id = 'game-${_nextId++}';
+    final game = SavedGameDetail(
+      header: SavedGameHeader(
+        id: id,
+        startedAt: startedAt,
+        completedAt: null,
+        mode: session.mode,
+        session: session,
+        configSummary: session.summary,
+        result: SavedGameResultKind.abandoned,
+        winner: null,
+        moveCount: 0,
+      ),
+      moves: const [],
+      finalFen: initialFen,
+    );
+    _games[id] = game;
+    return game;
+  }
+
+  @override
+  Future<void> finalizeGame({
+    required String gameId,
+    required SavedGameResultKind result,
+    required DateTime completedAt,
+    PieceSide? winner,
+    String? finalFen,
+  }) async {
+    final game = _games[gameId];
+    if (game == null) {
+      return;
+    }
+    _games[gameId] = game.copyWith(
+      finalFen: finalFen ?? game.finalFen,
+      header: game.header.copyWith(
+        completedAt: completedAt,
+        result: result,
+        winner: winner,
+        clearWinner: winner == null,
+        moveCount: game.moves.length,
+      ),
+    );
+  }
+
+  @override
+  Future<SavedGameDetail?> loadGame(String id) async => _games[id];
+
+  @override
+  Future<List<SavedGameHeader>> loadHeaders() async {
+    return _games.values.map((game) => game.header).toList(growable: false);
+  }
+}
+
 void main() {
-  ProviderContainer createContainer() {
+  Future<ProviderContainer> createContainer() async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
     return ProviderContainer(
-      overrides: [chessEngineProvider.overrideWithValue(PackageChessEngine())],
+      overrides: [
+        chessEngineProvider.overrideWithValue(PackageChessEngine()),
+        sharedPreferencesProvider.overrideWithValue(preferences),
+        gameHistoryRepositoryProvider.overrideWithValue(
+          _MemoryGameHistoryRepository(),
+        ),
+      ],
     );
   }
 
   test('controller updates selection state correctly', () async {
-    final container = createContainer();
+    final container = await createContainer();
     addTearDown(container.dispose);
     final controller = container.read(gameControllerProvider.notifier);
 
@@ -27,12 +122,22 @@ void main() {
   });
 
   test(
-    'ai turn triggers after a player move and returns control to white',
+    'human vs ai session triggers ai and returns control to white',
     () async {
-      final container = createContainer();
+      final container = await createContainer();
       addTearDown(container.dispose);
       final controller = container.read(gameControllerProvider.notifier);
 
+      await controller.startSession(
+        const GameSession(
+          mode: GameMode.humanVsAi,
+          blackAi: GameAiConfig(
+            engine: AiEngineKind.minimax,
+            difficulty: AiDifficulty.easy,
+          ),
+          aiMoveDelay: Duration.zero,
+        ),
+      );
       await controller.handleSquareTap(const SquarePosition(file: 4, rank: 6));
       await controller.handleSquareTap(const SquarePosition(file: 4, rank: 4));
 
@@ -42,4 +147,21 @@ void main() {
       expect(state.lastMove, isNotNull);
     },
   );
+
+  test('local two-player mode skips ai and leaves turn on black', () async {
+    final container = await createContainer();
+    addTearDown(container.dispose);
+    final controller = container.read(gameControllerProvider.notifier);
+
+    await controller.startSession(
+      const GameSession(mode: GameMode.localTwoPlayer),
+    );
+    await controller.handleSquareTap(const SquarePosition(file: 4, rank: 6));
+    await controller.handleSquareTap(const SquarePosition(file: 4, rank: 4));
+
+    final state = container.read(gameControllerProvider);
+
+    expect(state.turn, PieceSide.black);
+    expect(state.isAiThinking, isFalse);
+  });
 }

@@ -17,7 +17,10 @@ dependencies:
   dartchess: ^0.12.3
   fast_immutable_collections: ^11.2.0
   flutter_svg: ^2.2.2
+  path_provider: ^2.1.5
   shared_preferences: ^2.5.3
+  stockfish: ^1.8.1
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:

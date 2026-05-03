@@ -4,6 +4,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/models/move_option.dart';
+import '../../domain/models/piece_data.dart';
 import '../../domain/models/promotion_choice.dart';
 import '../../domain/models/square_position.dart';
 
@@ -15,7 +16,8 @@ class ChessBoard extends StatelessWidget {
     required this.pieceAssets,
     required this.validMovesByOrigin,
     required this.onMove,
-    required this.isInteractive,
+    required this.playerSide,
+    required this.sideToMove,
     required this.isCheck,
     this.lastMove,
     required this.lightSquareColor,
@@ -30,7 +32,8 @@ class ChessBoard extends StatelessWidget {
   final PieceAssets pieceAssets;
   final Map<SquarePosition, List<MoveOption>> validMovesByOrigin;
   final ValueChanged<MoveOption> onMove;
-  final bool isInteractive;
+  final PlayerSide playerSide;
+  final PieceSide sideToMove;
   final bool isCheck;
   final MoveOption? lastMove;
   final Color lightSquareColor;
@@ -80,8 +83,8 @@ class ChessBoard extends StatelessWidget {
         showLastMove: true,
       ),
       game: GameData(
-        playerSide: isInteractive ? PlayerSide.white : PlayerSide.none,
-        sideToMove: isInteractive ? dc.Side.white : dc.Side.black,
+        playerSide: playerSide,
+        sideToMove: sideToMove == PieceSide.white ? dc.Side.white : dc.Side.black,
         validMoves: _toValidMoves(validMovesByOrigin),
         promotionMove: null,
         isCheck: isCheck,

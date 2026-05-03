@@ -1,6 +1,7 @@
 import '../domain/models/board_state.dart';
 import '../domain/models/game_mode.dart';
 import '../domain/models/game_status.dart';
+import '../domain/models/game_session.dart';
 import '../domain/models/move_option.dart';
 import '../domain/models/piece_data.dart';
 import '../domain/models/square_position.dart';
@@ -11,7 +12,7 @@ class GameState {
     required this.board,
     required this.turn,
     required this.status,
-    required this.mode,
+    required this.session,
     this.legalMovesByOrigin = const {},
     this.selectedSquare,
     this.legalMoves = const [],
@@ -26,7 +27,7 @@ class GameState {
   final BoardState board;
   final PieceSide turn;
   final GameStatus status;
-  final GameMode mode;
+  final GameSession session;
   final Map<SquarePosition, List<MoveOption>> legalMovesByOrigin;
   final SquarePosition? selectedSquare;
   final List<MoveOption> legalMoves;
@@ -41,7 +42,7 @@ class GameState {
     BoardState? board,
     PieceSide? turn,
     GameStatus? status,
-    GameMode? mode,
+    GameSession? session,
     Map<SquarePosition, List<MoveOption>>? legalMovesByOrigin,
     SquarePosition? selectedSquare,
     bool clearSelectedSquare = false,
@@ -59,7 +60,7 @@ class GameState {
       board: board ?? this.board,
       turn: turn ?? this.turn,
       status: status ?? this.status,
-      mode: mode ?? this.mode,
+      session: session ?? this.session,
       legalMovesByOrigin: legalMovesByOrigin ?? this.legalMovesByOrigin,
       selectedSquare: clearSelectedSquare
           ? null
@@ -74,4 +75,6 @@ class GameState {
       lastMove: clearLastMove ? null : lastMove ?? this.lastMove,
     );
   }
+
+  GameMode get mode => session.mode;
 }

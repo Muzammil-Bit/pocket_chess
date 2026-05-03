@@ -1,1 +1,1 @@
-enum GameMode { humanVsAi }
+enum GameMode { humanVsAi, localTwoPlayer, aiVsAi }
