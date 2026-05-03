@@ -80,18 +80,29 @@ class GameScreen extends ConsumerWidget {
             SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
+                  const screenPadding = 6.0;
+                  const boardFrameAllowance = 50.0;
                   final boardSize = math.min(
-                    (constraints.maxWidth - 32).clamp(280.0, 520.0),
-                    (constraints.maxHeight - 280).clamp(280.0, 520.0),
+                    (constraints.maxWidth -
+                            (screenPadding * 2) -
+                            boardFrameAllowance)
+                        .clamp(
+                      240.0,
+                      520.0,
+                    ),
+                    (constraints.maxHeight - 280 - boardFrameAllowance).clamp(
+                      240.0,
+                      520.0,
+                    ),
                   );
 
                   return SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(screenPadding),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: 620,
-                          minHeight: constraints.maxHeight - 32,
+                          minHeight: constraints.maxHeight - (screenPadding * 2),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -339,13 +350,143 @@ class _PieceStrip extends StatelessWidget {
 class _BoardFrame extends StatelessWidget {
   const _BoardFrame({required this.boardSize, required this.child});
 
+  static const _fileLabels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  static const _rankLabels = ['8', '7', '6', '5', '4', '3', '2', '1'];
+
   final double boardSize;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    const outerInset = 3.0;
+    const labelBand = 14.0;
+    const boardPadding = 4.0;
+    const boardInset = outerInset + labelBand;
+    final outerSize =
+        boardSize + (boardPadding * 2) + ((labelBand + outerInset) * 2);
+
     return Center(
-      child: SizedBox(width: boardSize, height: boardSize, child: child),
+      child: SizedBox(
+        width: outerSize,
+        height: outerSize,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xE61A2146), Color(0xD41B244D)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(
+                    color: const Color(0x66E6ECFF),
+                    width: 1.2,
+                  ),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x2A93A4FF),
+                      blurRadius: 30,
+                      spreadRadius: 1,
+                    ),
+                    BoxShadow(
+                      color: Color(0x55070B18),
+                      blurRadius: 18,
+                      offset: Offset(0, 10),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              left: boardInset + boardPadding,
+              top: outerInset,
+              right: boardInset + boardPadding,
+              height: labelBand,
+              child: _BoardAxisLabels(
+                labels: _fileLabels,
+                axis: Axis.horizontal,
+              ),
+            ),
+            Positioned(
+              left: boardInset + boardPadding,
+              bottom: outerInset,
+              right: boardInset + boardPadding,
+              height: labelBand,
+              child: _BoardAxisLabels(
+                labels: _fileLabels,
+                axis: Axis.horizontal,
+              ),
+            ),
+            Positioned(
+              left: outerInset,
+              top: boardInset + boardPadding,
+              bottom: boardInset + boardPadding,
+              width: labelBand,
+              child: _BoardAxisLabels(labels: _rankLabels, axis: Axis.vertical),
+            ),
+            Positioned(
+              right: outerInset,
+              top: boardInset + boardPadding,
+              bottom: boardInset + boardPadding,
+              width: labelBand,
+              child: _BoardAxisLabels(labels: _rankLabels, axis: Axis.vertical),
+            ),
+            Positioned(
+              left: boardInset,
+              top: boardInset,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: SizedBox(
+                  width: boardSize + (boardPadding * 2),
+                  height: boardSize + (boardPadding * 2),
+                  child: ColoredBox(
+                    color: const Color(0x2610152D),
+                    child: Padding(
+                      padding: const EdgeInsets.all(boardPadding),
+                      child: SizedBox(
+                        width: boardSize,
+                        height: boardSize,
+                        child: child,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BoardAxisLabels extends StatelessWidget {
+  const _BoardAxisLabels({required this.labels, required this.axis});
+
+  final List<String> labels;
+  final Axis axis;
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = TextStyle(
+      color: const Color(0xFFE7ECFF).withValues(alpha: 0.62),
+      fontSize: 12,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.4,
+    );
+
+    return Flex(
+      direction: axis,
+      children: [
+        for (final label in labels)
+          Expanded(
+            child: Center(
+              child: Text(label.toUpperCase(), style: textStyle),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -365,7 +506,7 @@ class _BoardStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glowWidth = math.min(boardSize + 64, 620.0);
+    final glowWidth = math.min(boardSize + 104, 620.0);
 
     return Center(
       child: SizedBox(

@@ -65,7 +65,7 @@ class ChessBoard extends StatelessWidget {
         animationDuration: Duration(milliseconds: 180),
         dragTargetKind: DragTargetKind.circle,
         pieceShiftMethod: PieceShiftMethod.either,
-        enableCoordinates: true,
+        enableCoordinates: false,
         showValidMoves: true,
         showLastMove: true,
       ),
