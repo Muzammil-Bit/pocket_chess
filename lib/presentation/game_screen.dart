@@ -115,6 +115,7 @@ class GameScreen extends ConsumerWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
+                                const SizedBox(height: 20),
                                 _PlayersRow(
                                   isWhiteTurn: state.turn == PieceSide.white,
                                 ),
@@ -239,52 +240,81 @@ class _PlayerAvatar extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
-                    colors: [accent, accent.withValues(alpha: 0.82)],
+                    colors: isActive
+                        ? [accent, accent.withValues(alpha: 0.85)]
+                        : [
+                            accent.withValues(alpha: 0.35),
+                            accent.withValues(alpha: 0.2),
+                          ],
+                  ),
+                  border: Border.all(
+                    color: isActive ? accent : accent.withValues(alpha: 0.15),
+                    width: isActive ? 2.0 : 1.0,
                   ),
                   boxShadow: isActive
                       ? [
                           BoxShadow(
-                            color: accent.withValues(alpha: 0.38),
-                            blurRadius: 18,
-                            spreadRadius: 2,
+                            color: accent.withValues(alpha: 0.45),
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                          ),
+                          BoxShadow(
+                            color: accent.withValues(alpha: 0.2),
+                            blurRadius: 8,
                           ),
                         ]
                       : null,
                 ),
                 alignment: Alignment.center,
-                child: Text(
-                  initials,
+                child: AnimatedDefaultTextStyle(
+                  duration: const Duration(milliseconds: 300),
                   style: TextStyle(
-                    color: colors.avatarInitialsColor,
+                    color: isActive
+                        ? colors.avatarInitialsColor
+                        : colors.avatarInitialsColor.withValues(alpha: 0.4),
                     fontWeight: FontWeight.w800,
+                    fontSize: 14,
                   ),
+                  child: Text(initials),
                 ),
               ),
               const SizedBox(height: 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
+              AnimatedDefaultTextStyle(
+                duration: const Duration(milliseconds: 300),
                 style: TextStyle(
                   color: isActive ? colors.activeText : colors.inactiveText,
-                  fontWeight: FontWeight.w700,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  fontSize: 13,
                 ),
+                child: Text(label, textAlign: TextAlign.center),
               ),
               const SizedBox(height: 6),
-              AnimatedOpacity(
-                opacity: isActive ? 1 : 0.25,
-                duration: const Duration(milliseconds: 180),
-                child: Container(
-                  width: 56,
-                  height: 2,
-                  color: isActive
-                      ? colors.activeIndicator
-                      : colors.inactiveIndicator,
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOut,
+                width: isActive ? 32 : 0,
+                height: 3,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(2),
+                  color: isActive ? colors.activeIndicator : Colors.transparent,
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: colors.activeIndicator.withValues(
+                              alpha: 0.5,
+                            ),
+                            blurRadius: 6,
+                          ),
+                        ]
+                      : null,
                 ),
               ),
             ],
