@@ -3,11 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../application/app_settings_controller.dart';
 import '../application/providers.dart';
 import '../domain/models/piece_data.dart';
-import '../domain/models/piece_glyphs.dart';
+import '../domain/models/piece_theme_option.dart';
 import 'widgets/chess_board.dart';
 import 'widgets/promotion_dialog.dart';
+import 'widgets/themed_piece_icon.dart';
 
 class GameScreen extends ConsumerWidget {
   const GameScreen({super.key});
@@ -39,6 +41,7 @@ class GameScreen extends ConsumerWidget {
 
     final state = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
+    final pieceTheme = ref.watch(selectedPieceThemeProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFF0A0E1F),
@@ -104,7 +107,7 @@ class GameScreen extends ConsumerWidget {
                                 _PieceStrip(
                                   pieces: state.blackCaptured,
                                   alignment: Alignment.centerRight,
-                                  useSolidGlyphs: false,
+                                  theme: pieceTheme,
                                 ),
                                 const SizedBox(height: 16),
                                 _BoardFrame(
@@ -112,6 +115,7 @@ class GameScreen extends ConsumerWidget {
                                   child: ChessBoard(
                                     fen: state.fen,
                                     boardSize: boardSize,
+                                    pieceAssets: pieceTheme.boardAssets,
                                     validMovesByOrigin:
                                         state.legalMovesByOrigin,
                                     isInteractive:
@@ -129,7 +133,7 @@ class GameScreen extends ConsumerWidget {
                                 _PieceStrip(
                                   pieces: state.whiteCaptured,
                                   alignment: Alignment.centerRight,
-                                  useSolidGlyphs: true,
+                                  theme: pieceTheme,
                                 ),
                               ],
                             ),
@@ -300,12 +304,12 @@ class _PieceStrip extends StatelessWidget {
   const _PieceStrip({
     required this.pieces,
     required this.alignment,
-    required this.useSolidGlyphs,
+    required this.theme,
   });
 
   final List<PieceData> pieces;
   final Alignment alignment;
-  final bool useSolidGlyphs;
+  final PieceThemeOption theme;
 
   @override
   Widget build(BuildContext context) {
@@ -321,33 +325,13 @@ class _PieceStrip extends StatelessWidget {
               for (final piece in pieces)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    useSolidGlyphs ? piece.solidGlyph : piece.glyph,
-                    style: const TextStyle(
-                      color: Color(0xFFF3F5FF),
-                      fontSize: 36,
-                      height: 1,
-                    ),
-                  ),
+                  child: ThemedPieceIcon(piece: piece, theme: theme, size: 30),
                 ),
             ],
           ),
         ),
       ),
     );
-  }
-}
-
-extension on PieceData {
-  String get solidGlyph {
-    return switch (kind) {
-      PieceKind.king => '♚',
-      PieceKind.queen => '♛',
-      PieceKind.rook => '♜',
-      PieceKind.bishop => '♝',
-      PieceKind.knight => '♞',
-      PieceKind.pawn => '♟',
-    };
   }
 }
 

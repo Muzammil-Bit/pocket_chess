@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/providers.dart';
 import 'game_screen.dart';
+import 'settings_screen.dart';
 
 class StartScreen extends ConsumerWidget {
   const StartScreen({super.key});
@@ -82,19 +83,37 @@ class _LandingCopy extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2A3060),
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: const Text(
-              'Solo match',
-              style: TextStyle(
-                color: Color(0xFFD8DEFF),
-                fontWeight: FontWeight.w600,
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2A3060),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: const Text(
+                  'Solo match',
+                  style: TextStyle(
+                    color: Color(0xFFD8DEFF),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
-            ),
+              const Spacer(),
+              TextButton.icon(
+                key: const Key('open-settings-button'),
+                onPressed: () =>
+                    Navigator.of(context).pushNamed(SettingsScreen.routeName),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFDCE1FF),
+                ),
+                icon: const Icon(Icons.tune_rounded),
+                label: const Text('Settings'),
+              ),
+            ],
           ),
           const SizedBox(height: 22),
           const Text(

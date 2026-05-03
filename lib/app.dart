@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'presentation/game_screen.dart';
+import 'presentation/settings_screen.dart';
 import 'presentation/start_screen.dart';
 
 class ChessApp extends StatelessWidget {
@@ -62,6 +63,12 @@ class ChessApp extends StatelessWidget {
         if (settings.name == GameScreen.routeName) {
           return MaterialPageRoute<void>(
             builder: (_) => const GameScreen(),
+            settings: settings,
+          );
+        }
+        if (settings.name == SettingsScreen.routeName) {
+          return MaterialPageRoute<void>(
+            builder: (_) => const SettingsScreen(),
             settings: settings,
           );
         }

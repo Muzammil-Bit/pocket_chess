@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../application/app_settings_controller.dart';
 import '../../domain/models/piece_data.dart';
-import '../../domain/models/piece_glyphs.dart';
+import '../../domain/models/piece_theme_option.dart';
 import '../../domain/models/promotion_choice.dart';
+import 'themed_piece_icon.dart';
 
 Future<PromotionChoice?> showPromotionDialog(BuildContext context) {
   return showDialog<PromotionChoice>(
@@ -12,11 +15,13 @@ Future<PromotionChoice?> showPromotionDialog(BuildContext context) {
   );
 }
 
-class _PromotionDialog extends StatelessWidget {
+class _PromotionDialog extends ConsumerWidget {
   const _PromotionDialog();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final pieceTheme = ref.watch(selectedPieceThemeProvider);
+
     return AlertDialog(
       title: const Text(
         'Choose a promotion',
@@ -39,12 +44,13 @@ class _PromotionDialog extends StatelessWidget {
                   border: Border.all(color: const Color(0xFF39427A)),
                 ),
                 child: Center(
-                  child: Text(
-                    _pieceGlyph(choice),
-                    style: const TextStyle(
-                      fontSize: 40,
-                      color: Color(0xFFF5F7FF),
+                  child: ThemedPieceIcon(
+                    piece: PieceData(
+                      side: PieceSide.white,
+                      kind: choice.pieceKind,
                     ),
+                    theme: pieceTheme,
+                    size: 42,
                   ),
                 ),
               ),
@@ -52,26 +58,5 @@ class _PromotionDialog extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _pieceGlyph(PromotionChoice choice) {
-    return switch (choice) {
-      PromotionChoice.queen => const PieceData(
-        side: PieceSide.white,
-        kind: PieceKind.queen,
-      ).glyph,
-      PromotionChoice.rook => const PieceData(
-        side: PieceSide.white,
-        kind: PieceKind.rook,
-      ).glyph,
-      PromotionChoice.bishop => const PieceData(
-        side: PieceSide.white,
-        kind: PieceKind.bishop,
-      ).glyph,
-      PromotionChoice.knight => const PieceData(
-        side: PieceSide.white,
-        kind: PieceKind.knight,
-      ).glyph,
-    };
   }
 }

@@ -12,6 +12,7 @@ class ChessBoard extends StatelessWidget {
     super.key,
     required this.fen,
     required this.boardSize,
+    required this.pieceAssets,
     required this.validMovesByOrigin,
     required this.onMove,
     required this.isInteractive,
@@ -21,6 +22,7 @@ class ChessBoard extends StatelessWidget {
 
   final String fen;
   final double boardSize;
+  final PieceAssets pieceAssets;
   final Map<SquarePosition, List<MoveOption>> validMovesByOrigin;
   final ValueChanged<MoveOption> onMove;
   final bool isInteractive;
@@ -35,7 +37,7 @@ class ChessBoard extends StatelessWidget {
       orientation: dc.Side.white,
       fen: fen,
       lastMove: _normalMoveFrom(lastMove),
-      settings: const ChessboardSettings(
+      settings: ChessboardSettings(
         colorScheme: ChessboardColorScheme(
           lightSquare: Color(0xFFF3F4FB),
           darkSquare: Color(0xFF9198B5),
@@ -59,6 +61,7 @@ class ChessBoard extends StatelessWidget {
           validMoves: Color(0xCC4B58FF),
           validPremoves: Color(0x994B58FF),
         ),
+        pieceAssets: pieceAssets,
         animationDuration: Duration(milliseconds: 180),
         dragTargetKind: DragTargetKind.circle,
         pieceShiftMethod: PieceShiftMethod.either,
