@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/app_settings_controller.dart';
 import '../domain/models/piece_data.dart';
 import '../domain/models/piece_theme_option.dart';
+import 'app_colors.dart';
 import 'widgets/themed_piece_icon.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -13,50 +14,61 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.appColors;
     final selectedThemeId = ref.watch(
       appSettingsProvider.select((value) => value.pieceThemeId),
     );
     final availableThemes = ref.watch(availablePieceThemesProvider);
+    final themeMode = ref.watch(
+      appSettingsProvider.select((value) => value.themeMode),
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1F),
+      backgroundColor: colors.gradientColors.first,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFF5F7FF),
+        foregroundColor: colors.textHeading,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Settings',
-          style: TextStyle(fontWeight: FontWeight.w700, letterSpacing: -0.2),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+            color: colors.textHeading,
+          ),
         ),
       ),
       body: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF090B18), Color(0xFF121735), Color(0xFF1B2350)],
+            colors: colors.gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               top: -60,
               right: -40,
-              child: _GlowOrb(size: 220, color: Color(0x554D5BFF)),
+              child: _GlowOrb(size: 220, color: colors.glowOrbPrimary),
             ),
             SafeArea(
               child: availableThemes.when(
-                data: (themes) => _ThemesGrid(
+                data: (themes) => _SettingsBody(
                   themes: themes,
                   selectedThemeId: selectedThemeId,
-                  onSelect: (id) =>
+                  themeMode: themeMode,
+                  onSelectPieceTheme: (id) =>
                       ref.read(appSettingsProvider.notifier).setPieceTheme(id),
+                  onSelectThemeMode: (mode) =>
+                      ref.read(appSettingsProvider.notifier).setThemeMode(mode),
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stackTrace) => Center(
                   child: Text(
-                    'Unable to load piece themes.',
+                    'Unable to load settings.',
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                 ),
@@ -69,24 +81,37 @@ class SettingsScreen extends ConsumerWidget {
   }
 }
 
-class _ThemesGrid extends StatelessWidget {
-  const _ThemesGrid({
+class _SettingsBody extends StatelessWidget {
+  const _SettingsBody({
     required this.themes,
     required this.selectedThemeId,
-    required this.onSelect,
+    required this.themeMode,
+    required this.onSelectPieceTheme,
+    required this.onSelectThemeMode,
   });
 
   final List<PieceThemeOption> themes;
   final String selectedThemeId;
-  final ValueChanged<String> onSelect;
+  final ThemeMode themeMode;
+  final ValueChanged<String> onSelectPieceTheme;
+  final ValueChanged<ThemeMode> onSelectThemeMode;
 
   @override
   Widget build(BuildContext context) {
     return CustomScrollView(
       slivers: [
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 18),
+          sliver: SliverToBoxAdapter(
+            child: _ThemeModeSection(
+              themeMode: themeMode,
+              onChanged: onSelectThemeMode,
+            ),
+          ),
+        ),
         const SliverPadding(
           padding: EdgeInsets.fromLTRB(20, 8, 20, 18),
-          sliver: SliverToBoxAdapter(child: _SectionHeader()),
+          sliver: SliverToBoxAdapter(child: _SectionHeader(label: 'Piece set')),
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
@@ -103,7 +128,7 @@ class _ThemesGrid extends StatelessWidget {
                 key: ValueKey('piece-theme-${theme.id}'),
                 theme: theme,
                 isSelected: theme.id == selectedThemeId,
-                onTap: () => onSelect(theme.id),
+                onTap: () => onSelectPieceTheme(theme.id),
               );
             }, childCount: themes.length),
           ),
@@ -113,15 +138,122 @@ class _ThemesGrid extends StatelessWidget {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader();
+class _ThemeModeSection extends StatelessWidget {
+  const _ThemeModeSection({required this.themeMode, required this.onChanged});
+
+  final ThemeMode themeMode;
+  final ValueChanged<ThemeMode> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Piece set',
+    final colors = context.appColors;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(label: 'Appearance'),
+        const SizedBox(height: 14),
+        Container(
+          decoration: BoxDecoration(
+            color: colors.cardBackground,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: colors.cardBorder),
+          ),
+          child: Row(
+            children: [
+              for (final mode in ThemeMode.values)
+                Expanded(
+                  child: _ThemeModeChip(
+                    mode: mode,
+                    isSelected: themeMode == mode,
+                    onTap: () => onChanged(mode),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ThemeModeChip extends StatelessWidget {
+  const _ThemeModeChip({
+    required this.mode,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final ThemeMode mode;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    final icon = switch (mode) {
+      ThemeMode.system => Icons.brightness_auto_rounded,
+      ThemeMode.light => Icons.light_mode_rounded,
+      ThemeMode.dark => Icons.dark_mode_rounded,
+    };
+
+    final label = switch (mode) {
+      ThemeMode.system => 'System',
+      ThemeMode.light => 'Light',
+      ThemeMode.dark => 'Dark',
+    };
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.accentPrimary.withValues(alpha: 0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 22,
+              color: isSelected ? colors.accentPrimary : colors.textMuted,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? colors.accentPrimary : colors.textMuted,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return Text(
+      label,
       style: TextStyle(
-        color: Color(0xFFAEB7E5),
+        color: colors.sectionHeader,
         fontSize: 13,
         fontWeight: FontWeight.w600,
         letterSpacing: 1.4,
@@ -144,9 +276,8 @@ class _ThemeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isSelected
-        ? const Color(0xFF6C7BFF)
-        : const Color(0xFF262E57);
+    final colors = context.appColors;
+    final borderColor = isSelected ? colors.accentBorder : colors.cardBorder;
 
     return Material(
       color: Colors.transparent,
@@ -157,15 +288,15 @@ class _ThemeCard extends StatelessWidget {
           duration: const Duration(milliseconds: 180),
           curve: Curves.easeOut,
           decoration: BoxDecoration(
-            color: const Color(0xFF0D1128),
+            color: colors.cardBackground,
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: borderColor, width: isSelected ? 1.6 : 1),
             boxShadow: isSelected
-                ? const [
+                ? [
                     BoxShadow(
-                      color: Color(0x444D5BFF),
+                      color: colors.accentPrimary.withValues(alpha: 0.26),
                       blurRadius: 22,
-                      offset: Offset(0, 10),
+                      offset: const Offset(0, 10),
                     ),
                   ]
                 : null,
@@ -196,7 +327,7 @@ class _ThemeCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: const Color(0xFFF5F7FF),
+                        color: colors.textHeading,
                         fontSize: 14,
                         fontWeight: isSelected
                             ? FontWeight.w700
@@ -206,10 +337,10 @@ class _ThemeCard extends StatelessWidget {
                     ),
                   ),
                   if (isSelected)
-                    const Icon(
+                    Icon(
                       Icons.radio_button_checked_rounded,
                       size: 18,
-                      color: Color(0xFF6C7BFF),
+                      color: colors.accentBorder,
                     ),
                 ],
               ),

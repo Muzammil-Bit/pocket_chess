@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/models/game_status.dart';
 import '../../domain/models/piece_data.dart';
+import '../app_colors.dart';
 
 class StatusPanel extends StatelessWidget {
   const StatusPanel({
@@ -17,6 +18,7 @@ class StatusPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final statusText = _statusText();
     final turnText = turn == PieceSide.white ? 'Your move' : 'Computer move';
 
@@ -24,9 +26,9 @@ class StatusPanel extends StatelessWidget {
       key: const Key('status-panel'),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF171B35).withValues(alpha: 0.94),
+        color: colors.panelBackground.withValues(alpha: 0.94),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFF2D3361)),
+        border: Border.all(color: colors.panelBorder),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -43,16 +45,16 @@ class StatusPanel extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: turn == PieceSide.white
-                      ? const Color(0xFFEEF2FF)
-                      : const Color(0xFF616BBA),
+                      ? colors.activeText
+                      : colors.inactiveText,
                 ),
               ),
               const SizedBox(width: 10),
               Text(
                 turnText,
                 key: const Key('turn-label'),
-                style: const TextStyle(
-                  color: Color(0xFFF4F6FF),
+                style: TextStyle(
+                  color: colors.textHeading,
                   fontSize: 15,
                   fontWeight: FontWeight.w700,
                 ),
@@ -97,16 +99,18 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Container(
       key: const Key('status-badge'),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isThinking
-            ? const Color(0xFF2A3060)
-            : const Color(0xFF20274D).withValues(alpha: 0.96),
+        color: isThinking ? colors.statusBadgeActiveBg : colors.statusBadgeBg,
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: isThinking ? const Color(0xFF6876FF) : const Color(0xFF3A4278),
+          color: isThinking
+              ? colors.statusBadgeActiveBorder
+              : colors.statusBadgeBorder,
         ),
       ),
       child: Row(
@@ -115,15 +119,15 @@ class _StatusBadge extends StatelessWidget {
           Icon(
             isThinking ? Icons.psychology_alt_outlined : Icons.flag_outlined,
             size: 18,
-            color: const Color(0xFFDDE2FF),
+            color: colors.textHeading,
           ),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               label,
               key: const Key('status-text'),
-              style: const TextStyle(
-                color: Color(0xFFEFF2FF),
+              style: TextStyle(
+                color: colors.textHeading,
                 fontWeight: FontWeight.w600,
               ),
             ),

@@ -7,6 +7,7 @@ import '../application/app_settings_controller.dart';
 import '../application/providers.dart';
 import '../domain/models/piece_data.dart';
 import '../domain/models/piece_theme_option.dart';
+import 'app_colors.dart';
 import 'widgets/chess_board.dart';
 import 'widgets/promotion_dialog.dart';
 import 'widgets/themed_piece_icon.dart';
@@ -18,6 +19,8 @@ class GameScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.appColors;
+
     ref.listen(
       gameControllerProvider.select((value) => value.pendingPromotionMove),
       (previous, next) async {
@@ -44,37 +47,40 @@ class GameScreen extends ConsumerWidget {
     final pieceTheme = ref.watch(selectedPieceThemeProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1F),
+      backgroundColor: colors.gradientColors.first,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        foregroundColor: const Color(0xFFF5F7FF),
+        foregroundColor: colors.textHeading,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Pocket Chess',
-          style: TextStyle(fontWeight: FontWeight.w700),
+          style: TextStyle(
+            fontWeight: FontWeight.w700,
+            color: colors.textHeading,
+          ),
         ),
         centerTitle: true,
       ),
       body: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF090B18), Color(0xFF121735), Color(0xFF1B2350)],
+            colors: colors.gradientColors,
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: Stack(
           children: [
-            const Positioned(
+            Positioned(
               top: -40,
               right: -10,
-              child: _GlowOrb(size: 240, color: Color(0x70505FFF)),
+              child: _GlowOrb(size: 240, color: colors.glowOrbPrimary),
             ),
-            const Positioned(
+            Positioned(
               bottom: 100,
               left: -30,
-              child: _GlowOrb(size: 220, color: Color(0x403B4275)),
+              child: _GlowOrb(size: 220, color: colors.glowOrbSecondary),
             ),
             const Positioned.fill(child: _BoardBackdrop()),
             SafeArea(
@@ -86,10 +92,7 @@ class GameScreen extends ConsumerWidget {
                     (constraints.maxWidth -
                             (screenPadding * 2) -
                             boardFrameAllowance)
-                        .clamp(
-                      240.0,
-                      520.0,
-                    ),
+                        .clamp(240.0, 520.0),
                     (constraints.maxHeight - 280 - boardFrameAllowance).clamp(
                       240.0,
                       520.0,
@@ -102,7 +105,8 @@ class GameScreen extends ConsumerWidget {
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                           maxWidth: 620,
-                          minHeight: constraints.maxHeight - (screenPadding * 2),
+                          minHeight:
+                              constraints.maxHeight - (screenPadding * 2),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -218,6 +222,8 @@ class _PlayerAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       crossAxisAlignment: alignment,
       children: [
@@ -247,8 +253,8 @@ class _PlayerAvatar extends StatelessWidget {
                 alignment: Alignment.center,
                 child: Text(
                   initials,
-                  style: const TextStyle(
-                    color: Color(0xFF0F1430),
+                  style: TextStyle(
+                    color: colors.avatarInitialsColor,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -258,9 +264,7 @@ class _PlayerAvatar extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: isActive
-                      ? const Color(0xFFF5F7FF)
-                      : const Color(0xFFB8C2EF),
+                  color: isActive ? colors.activeText : colors.inactiveText,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -272,8 +276,8 @@ class _PlayerAvatar extends StatelessWidget {
                   width: 56,
                   height: 2,
                   color: isActive
-                      ? const Color(0xFF6C7BFF)
-                      : const Color(0xFF3A426E),
+                      ? colors.activeIndicator
+                      : colors.inactiveIndicator,
                 ),
               ),
             ],
@@ -291,22 +295,21 @@ class _TimerPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return Column(
       children: [
         Text(
           time,
-          style: const TextStyle(
-            color: Color(0xFFF5F7FF),
+          style: TextStyle(
+            color: colors.textHeading,
             fontSize: 24,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.6,
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Timer',
-          style: TextStyle(color: Color(0xFF93A0D6), fontSize: 12),
-        ),
+        Text('Timer', style: TextStyle(color: colors.textMuted, fontSize: 12)),
       ],
     );
   }
@@ -358,6 +361,7 @@ class _BoardFrame extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     const outerInset = 3.0;
     const labelBand = 14.0;
     const boardPadding = 4.0;
@@ -375,25 +379,28 @@ class _BoardFrame extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xE61A2146), Color(0xD41B244D)],
+                  gradient: LinearGradient(
+                    colors: [
+                      colors.boardFrameGradientStart,
+                      colors.boardFrameGradientEnd,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   border: Border.all(
-                    color: const Color(0x66E6ECFF),
+                    color: colors.boardFrameBorder,
                     width: 1.2,
                   ),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x2A93A4FF),
+                      color: colors.accentBorder.withValues(alpha: 0.16),
                       blurRadius: 30,
                       spreadRadius: 1,
                     ),
                     BoxShadow(
-                      color: Color(0x55070B18),
+                      color: colors.cardShadow,
                       blurRadius: 18,
-                      offset: Offset(0, 10),
+                      offset: const Offset(0, 10),
                     ),
                   ],
                 ),
@@ -442,7 +449,7 @@ class _BoardFrame extends StatelessWidget {
                   width: boardSize + (boardPadding * 2),
                   height: boardSize + (boardPadding * 2),
                   child: ColoredBox(
-                    color: const Color(0x2610152D),
+                    color: colors.boardInnerBg,
                     child: Padding(
                       padding: const EdgeInsets.all(boardPadding),
                       child: ClipRRect(
@@ -473,8 +480,9 @@ class _BoardAxisLabels extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     final textStyle = TextStyle(
-      color: const Color(0xFFE7ECFF).withValues(alpha: 0.62),
+      color: colors.axisLabelColor,
       fontSize: 12,
       fontWeight: FontWeight.w700,
       letterSpacing: 0.4,
@@ -485,9 +493,7 @@ class _BoardAxisLabels extends StatelessWidget {
       children: [
         for (final label in labels)
           Expanded(
-            child: Center(
-              child: Text(label.toUpperCase(), style: textStyle),
-            ),
+            child: Center(child: Text(label.toUpperCase(), style: textStyle)),
           ),
       ],
     );
@@ -518,9 +524,7 @@ class _BoardStage extends StatelessWidget {
           clipBehavior: Clip.none,
           children: [
             const Positioned.fill(
-              child: IgnorePointer(
-                child: _BoardStageGlow(),
-              ),
+              child: IgnorePointer(child: _BoardStageGlow()),
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
@@ -544,17 +548,14 @@ class _BoardStageGlow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.center,
           radius: 1.08,
-          colors: [
-            const Color(0x666F7DFF),
-            const Color(0x386276FF),
-            const Color(0x0B3D4D8D),
-            const Color(0x00333D7A),
-          ],
+          colors: colors.boardGlowColors,
           stops: const [0.0, 0.38, 0.72, 1.0],
         ),
       ),
@@ -562,11 +563,11 @@ class _BoardStageGlow extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              const Color(0x003A4CFF),
-              const Color(0x185667A8),
-              const Color(0x3E6C7FFF),
-              const Color(0x185667A8),
-              const Color(0x003A4CFF),
+              colors.boardGlowColors.last,
+              colors.boardGlowColors[1],
+              colors.boardGlowColors.first,
+              colors.boardGlowColors[1],
+              colors.boardGlowColors.last,
             ],
             stops: const [0.0, 0.18, 0.5, 0.82, 1.0],
             begin: Alignment.centerLeft,
@@ -623,9 +624,8 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final foreground = highlight
-        ? const Color(0xFFF6F7FF)
-        : const Color(0xFFD7DEFF);
+    final colors = context.appColors;
+    final foreground = highlight ? colors.textHeading : colors.inactiveText;
 
     return FilledButton.tonalIcon(
       onPressed: onPressed ?? () {},
@@ -656,15 +656,21 @@ class _BoardBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(child: CustomPaint(painter: _BoardBackdropPainter()));
+    return IgnorePointer(
+      child: CustomPaint(painter: _BoardBackdropPainter(context.appColors)),
+    );
   }
 }
 
 class _BoardBackdropPainter extends CustomPainter {
+  _BoardBackdropPainter(this.colors);
+
+  final AppColors colors;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0x12FFFFFF)
+      ..color = colors.boardBackdropStroke
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
@@ -683,7 +689,8 @@ class _BoardBackdropPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _BoardBackdropPainter oldDelegate) =>
+      oldDelegate.colors != colors;
 }
 
 class _GlowOrb extends StatelessWidget {

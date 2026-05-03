@@ -5,6 +5,7 @@ import '../../application/app_settings_controller.dart';
 import '../../domain/models/piece_data.dart';
 import '../../domain/models/piece_theme_option.dart';
 import '../../domain/models/promotion_choice.dart';
+import '../app_colors.dart';
 import 'themed_piece_icon.dart';
 
 Future<PromotionChoice?> showPromotionDialog(BuildContext context) {
@@ -20,12 +21,16 @@ class _PromotionDialog extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.appColors;
     final pieceTheme = ref.watch(selectedPieceThemeProvider);
 
     return AlertDialog(
-      title: const Text(
+      title: Text(
         'Choose a promotion',
-        style: TextStyle(fontWeight: FontWeight.w700),
+        style: TextStyle(
+          fontWeight: FontWeight.w700,
+          color: colors.textHeading,
+        ),
       ),
       content: Wrap(
         spacing: 12,
@@ -39,9 +44,9 @@ class _PromotionDialog extends ConsumerWidget {
                 width: 64,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF20274D),
+                  color: colors.promotionItemBg,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: const Color(0xFF39427A)),
+                  border: Border.all(color: colors.promotionItemBorder),
                 ),
                 child: Center(
                   child: ThemedPieceIcon(
