@@ -18,6 +18,11 @@ class ChessBoard extends StatelessWidget {
     required this.isInteractive,
     required this.isCheck,
     this.lastMove,
+    required this.lightSquareColor,
+    required this.darkSquareColor,
+    required this.lastMoveHighlight,
+    required this.selectedHighlight,
+    required this.validMovesColor,
   });
 
   final String fen;
@@ -28,6 +33,11 @@ class ChessBoard extends StatelessWidget {
   final bool isInteractive;
   final bool isCheck;
   final MoveOption? lastMove;
+  final Color lightSquareColor;
+  final Color darkSquareColor;
+  final Color lastMoveHighlight;
+  final Color selectedHighlight;
+  final Color validMovesColor;
 
   @override
   Widget build(BuildContext context) {
@@ -39,27 +49,27 @@ class ChessBoard extends StatelessWidget {
       lastMove: _normalMoveFrom(lastMove),
       settings: ChessboardSettings(
         colorScheme: ChessboardColorScheme(
-          lightSquare: Color(0xFFF3F4FB),
-          darkSquare: Color(0xFF9198B5),
+          lightSquare: lightSquareColor,
+          darkSquare: darkSquareColor,
           background: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFF3F4FB),
-            darkSquare: Color(0xFF9198B5),
+            lightSquare: lightSquareColor,
+            darkSquare: darkSquareColor,
           ),
           whiteCoordBackground: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFF3F4FB),
-            darkSquare: Color(0xFF9198B5),
+            lightSquare: lightSquareColor,
+            darkSquare: darkSquareColor,
             coordinates: true,
           ),
           blackCoordBackground: SolidColorChessboardBackground(
-            lightSquare: Color(0xFFF3F4FB),
-            darkSquare: Color(0xFF9198B5),
+            lightSquare: lightSquareColor,
+            darkSquare: darkSquareColor,
             coordinates: true,
             orientation: dc.Side.black,
           ),
-          lastMove: HighlightDetails(solidColor: Color(0x8C6270FF)),
-          selected: HighlightDetails(solidColor: Color(0xAA4B58FF)),
-          validMoves: Color(0xCC4B58FF),
-          validPremoves: Color(0x994B58FF),
+          lastMove: HighlightDetails(solidColor: lastMoveHighlight),
+          selected: HighlightDetails(solidColor: selectedHighlight),
+          validMoves: validMovesColor,
+          validPremoves: validMovesColor.withValues(alpha: 0.5),
         ),
         pieceAssets: pieceAssets,
         animationDuration: Duration(milliseconds: 180),

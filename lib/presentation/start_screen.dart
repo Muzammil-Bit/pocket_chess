@@ -238,24 +238,6 @@ class _HeroContentState extends State<_HeroContent>
               child: _GradientTitle(colors: colors),
             ),
           ),
-          const SizedBox(height: 14),
-          SlideTransition(
-            position: _subtitleSlide,
-            child: FadeTransition(
-              opacity: _subtitleOpacity,
-              child: Text(
-                'Challenge the engine. Sharpen your mind.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: colors.textMuted,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  height: 1.4,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 48),
           FadeTransition(
             opacity: _buttonOpacity,

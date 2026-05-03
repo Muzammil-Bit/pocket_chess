@@ -37,6 +37,12 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.boardBackdropStroke,
     required this.boardInnerBg,
     required this.axisLabelColor,
+    required this.boardLightSquare,
+    required this.boardDarkSquare,
+    required this.boardLastMoveHighlight,
+    required this.boardSelectedHighlight,
+    required this.boardValidMoveDot,
+    required this.boardInnerGlow,
   });
 
   final List<Color> gradientColors;
@@ -73,6 +79,12 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color boardBackdropStroke;
   final Color boardInnerBg;
   final Color axisLabelColor;
+  final Color boardLightSquare;
+  final Color boardDarkSquare;
+  final Color boardLastMoveHighlight;
+  final Color boardSelectedHighlight;
+  final Color boardValidMoveDot;
+  final Color boardInnerGlow;
 
   static const dark = AppColors(
     gradientColors: [Color(0xFF090B18), Color(0xFF121735), Color(0xFF1B2350)],
@@ -92,13 +104,13 @@ class AppColors extends ThemeExtension<AppColors> {
     statusBadgeActiveBg: Color(0xFF2A3060),
     statusBadgeBorder: Color(0xFF3A4278),
     statusBadgeActiveBorder: Color(0xFF6876FF),
-    boardFrameGradientStart: Color(0xE61A2146),
-    boardFrameGradientEnd: Color(0xD41B244D),
-    boardFrameBorder: Color(0x66E6ECFF),
+    boardFrameGradientStart: Color(0xF0222850),
+    boardFrameGradientEnd: Color(0xE81A2048),
+    boardFrameBorder: Color(0x40A0AAD0),
     boardGlowColors: [
-      Color(0x666F7DFF),
-      Color(0x386276FF),
-      Color(0x0B3D4D8D),
+      Color(0x507080E0),
+      Color(0x305868C0),
+      Color(0x104058A0),
       Color(0x00333D7A),
     ],
     promotionItemBg: Color(0xFF20274D),
@@ -112,8 +124,14 @@ class AppColors extends ThemeExtension<AppColors> {
     inactiveText: Color(0xFFB8C2EF),
     avatarInitialsColor: Color(0xFF0F1430),
     boardBackdropStroke: Color(0x12FFFFFF),
-    boardInnerBg: Color(0x2610152D),
-    axisLabelColor: Color(0x9EE7ECFF),
+    boardInnerBg: Color(0xFF1C2040),
+    axisLabelColor: Color(0xAAC0C8E8),
+    boardLightSquare: Color(0xFFD4BE9C),
+    boardDarkSquare: Color(0xFF8B6E4E),
+    boardLastMoveHighlight: Color(0x70A8C870),
+    boardSelectedHighlight: Color(0x7098B860),
+    boardValidMoveDot: Color(0xAA8898E8),
+    boardInnerGlow: Color(0x306070E0),
   );
 
   static const light = AppColors(
@@ -134,13 +152,13 @@ class AppColors extends ThemeExtension<AppColors> {
     statusBadgeActiveBg: Color(0xFFE0E4FF),
     statusBadgeBorder: Color(0xFFD0D5E8),
     statusBadgeActiveBorder: Color(0xFF8B96FF),
-    boardFrameGradientStart: Color(0xE6E8ECF7),
-    boardFrameGradientEnd: Color(0xD4DFE4F4),
-    boardFrameBorder: Color(0x66A0AAD0),
+    boardFrameGradientStart: Color(0xFFF5F0E8),
+    boardFrameGradientEnd: Color(0xFFE6DED2),
+    boardFrameBorder: Color(0x50C8B898),
     boardGlowColors: [
-      Color(0x336F7DFF),
-      Color(0x1A6276FF),
-      Color(0x08A0AAD0),
+      Color(0x389080C0),
+      Color(0x207868A8),
+      Color(0x0C5060A0),
       Color(0x00C0C6D8),
     ],
     promotionItemBg: Color(0xFFF0F2FA),
@@ -154,8 +172,14 @@ class AppColors extends ThemeExtension<AppColors> {
     inactiveText: Color(0xFF8A90B0),
     avatarInitialsColor: Color(0xFF1A1D2E),
     boardBackdropStroke: Color(0x0A000000),
-    boardInnerBg: Color(0x12E8ECF7),
-    axisLabelColor: Color(0x9E5A6080),
+    boardInnerBg: Color(0xFFEAE0D2),
+    axisLabelColor: Color(0xBB7A6A50),
+    boardLightSquare: Color(0xFFF0D9B5),
+    boardDarkSquare: Color(0xFFB58863),
+    boardLastMoveHighlight: Color(0x80C8D880),
+    boardSelectedHighlight: Color(0x80BACC70),
+    boardValidMoveDot: Color(0xBB6A8050),
+    boardInnerGlow: Color(0x208878B8),
   );
 
   @override
@@ -194,6 +218,12 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? boardBackdropStroke,
     Color? boardInnerBg,
     Color? axisLabelColor,
+    Color? boardLightSquare,
+    Color? boardDarkSquare,
+    Color? boardLastMoveHighlight,
+    Color? boardSelectedHighlight,
+    Color? boardValidMoveDot,
+    Color? boardInnerGlow,
   }) {
     return AppColors(
       gradientColors: gradientColors ?? this.gradientColors,
@@ -234,6 +264,14 @@ class AppColors extends ThemeExtension<AppColors> {
       boardBackdropStroke: boardBackdropStroke ?? this.boardBackdropStroke,
       boardInnerBg: boardInnerBg ?? this.boardInnerBg,
       axisLabelColor: axisLabelColor ?? this.axisLabelColor,
+      boardLightSquare: boardLightSquare ?? this.boardLightSquare,
+      boardDarkSquare: boardDarkSquare ?? this.boardDarkSquare,
+      boardLastMoveHighlight:
+          boardLastMoveHighlight ?? this.boardLastMoveHighlight,
+      boardSelectedHighlight:
+          boardSelectedHighlight ?? this.boardSelectedHighlight,
+      boardValidMoveDot: boardValidMoveDot ?? this.boardValidMoveDot,
+      boardInnerGlow: boardInnerGlow ?? this.boardInnerGlow,
     );
   }
 
@@ -333,6 +371,28 @@ class AppColors extends ThemeExtension<AppColors> {
       )!,
       boardInnerBg: Color.lerp(boardInnerBg, other.boardInnerBg, t)!,
       axisLabelColor: Color.lerp(axisLabelColor, other.axisLabelColor, t)!,
+      boardLightSquare: Color.lerp(
+        boardLightSquare,
+        other.boardLightSquare,
+        t,
+      )!,
+      boardDarkSquare: Color.lerp(boardDarkSquare, other.boardDarkSquare, t)!,
+      boardLastMoveHighlight: Color.lerp(
+        boardLastMoveHighlight,
+        other.boardLastMoveHighlight,
+        t,
+      )!,
+      boardSelectedHighlight: Color.lerp(
+        boardSelectedHighlight,
+        other.boardSelectedHighlight,
+        t,
+      )!,
+      boardValidMoveDot: Color.lerp(
+        boardValidMoveDot,
+        other.boardValidMoveDot,
+        t,
+      )!,
+      boardInnerGlow: Color.lerp(boardInnerGlow, other.boardInnerGlow, t)!,
     );
   }
 }

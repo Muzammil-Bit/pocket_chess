@@ -143,6 +143,13 @@ class GameScreen extends ConsumerWidget {
                                       lastMove: state.lastMove,
                                       onMove: (move) =>
                                           controller.handleMove(move),
+                                      lightSquareColor: colors.boardLightSquare,
+                                      darkSquareColor: colors.boardDarkSquare,
+                                      lastMoveHighlight:
+                                          colors.boardLastMoveHighlight,
+                                      selectedHighlight:
+                                          colors.boardSelectedHighlight,
+                                      validMovesColor: colors.boardValidMoveDot,
                                     ),
                                   ),
                                   bottomStrip: _PieceStrip(
@@ -378,29 +385,29 @@ class _BoardFrame extends StatelessWidget {
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                   gradient: LinearGradient(
                     colors: [
                       colors.boardFrameGradientStart,
                       colors.boardFrameGradientEnd,
                     ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
                   ),
                   border: Border.all(
                     color: colors.boardFrameBorder,
-                    width: 1.2,
+                    width: 1.0,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: colors.accentBorder.withValues(alpha: 0.16),
-                      blurRadius: 30,
-                      spreadRadius: 1,
+                      color: colors.boardInnerGlow.withValues(alpha: 0.18),
+                      blurRadius: 32,
+                      spreadRadius: 0,
                     ),
                     BoxShadow(
                       color: colors.cardShadow,
-                      blurRadius: 18,
-                      offset: const Offset(0, 10),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -443,23 +450,33 @@ class _BoardFrame extends StatelessWidget {
             Positioned(
               left: boardInset,
               top: boardInset,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: SizedBox(
-                  width: boardSize + (boardPadding * 2),
-                  height: boardSize + (boardPadding * 2),
-                  child: ColoredBox(
-                    color: colors.boardInnerBg,
-                    child: Padding(
-                      padding: const EdgeInsets.all(boardPadding),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: SizedBox(
-                          width: boardSize,
-                          height: boardSize,
-                          child: child,
-                        ),
-                      ),
+              child: Container(
+                width: boardSize + (boardPadding * 2),
+                height: boardSize + (boardPadding * 2),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6),
+                  color: colors.boardInnerBg,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                    BoxShadow(
+                      color: colors.boardInnerGlow.withValues(alpha: 0.2),
+                      blurRadius: 16,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(boardPadding),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: SizedBox(
+                      width: boardSize,
+                      height: boardSize,
+                      child: child,
                     ),
                   ),
                 ),
@@ -483,9 +500,9 @@ class _BoardAxisLabels extends StatelessWidget {
     final colors = context.appColors;
     final textStyle = TextStyle(
       color: colors.axisLabelColor,
-      fontSize: 12,
-      fontWeight: FontWeight.w700,
-      letterSpacing: 0.4,
+      fontSize: 10,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.3,
     );
 
     return Flex(
@@ -515,7 +532,7 @@ class _BoardStage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glowWidth = math.min(boardSize + 104, 620.0);
+    final glowWidth = math.min(boardSize + 80, 600.0);
 
     return Center(
       child: SizedBox(
@@ -549,30 +566,20 @@ class _BoardStageGlow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final glowColors = colors.boardGlowColors;
 
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: Alignment.center,
-          radius: 1.08,
-          colors: colors.boardGlowColors,
-          stops: const [0.0, 0.38, 0.72, 1.0],
-        ),
-      ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              colors.boardGlowColors.last,
-              colors.boardGlowColors[1],
-              colors.boardGlowColors.first,
-              colors.boardGlowColors[1],
-              colors.boardGlowColors.last,
-            ],
-            stops: const [0.0, 0.18, 0.5, 0.82, 1.0],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
+          radius: 0.8,
+          colors: [
+            glowColors.first.withValues(alpha: 0.25),
+            glowColors[1].withValues(alpha: 0.12),
+            glowColors[2].withValues(alpha: 0.04),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.35, 0.6, 1.0],
         ),
       ),
     );
