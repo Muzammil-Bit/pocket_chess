@@ -104,8 +104,10 @@ class GameScreen extends ConsumerWidget {
                               (screenPadding * 2) -
                               boardFrameAllowance)
                           .clamp(240.0, 520.0),
-                      (constraints.maxHeight - 280 - boardFrameAllowance)
-                          .clamp(240.0, 520.0),
+                      (constraints.maxHeight - 280 - boardFrameAllowance).clamp(
+                        240.0,
+                        520.0,
+                      ),
                     );
 
                     return SingleChildScrollView(
@@ -156,8 +158,7 @@ class GameScreen extends ConsumerWidget {
                                             controller.handleMove(move),
                                         lightSquareColor:
                                             colors.boardLightSquare,
-                                        darkSquareColor:
-                                            colors.boardDarkSquare,
+                                        darkSquareColor: colors.boardDarkSquare,
                                         lastMoveHighlight:
                                             colors.boardLastMoveHighlight,
                                         selectedHighlight:
@@ -193,10 +194,7 @@ class GameScreen extends ConsumerWidget {
     );
   }
 
-  PlayerSide _playerSideFor(
-    GameSession session,
-    GameController controller,
-  ) {
+  PlayerSide _playerSideFor(GameSession session, GameController controller) {
     if (!controller.canHumanInteract()) {
       return PlayerSide.none;
     }
@@ -214,10 +212,7 @@ class GameScreen extends ConsumerWidget {
 }
 
 class _PlayersRow extends StatelessWidget {
-  const _PlayersRow({
-    required this.session,
-    required this.activeSide,
-  });
+  const _PlayersRow({required this.session, required this.activeSide});
 
   final GameSession session;
   final PieceSide activeSide;

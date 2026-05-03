@@ -27,6 +27,7 @@ class StartScreen extends ConsumerWidget {
           ),
         ),
         child: Stack(
+          clipBehavior: Clip.none,
           children: [
             const _FloatingPieces(),
             Positioned(
@@ -48,26 +49,43 @@ class StartScreen extends ConsumerWidget {
               ),
             ),
             SafeArea(
-              child: Column(
+              child: Stack(
                 children: [
-                  _TopBar(
-                    onHistory: () => Navigator.of(
-                      context,
-                    ).pushNamed(HistoryScreen.routeName),
-                    onSettings: () => Navigator.of(
-                      context,
-                    ).pushNamed(SettingsScreen.routeName),
+                  Positioned.fill(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: Center(
+                              child: Transform.translate(
+                                offset: const Offset(0, -28),
+                                child: _HeroContent(
+                                  onPlay: () {
+                                    _startGame(context, ref);
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
-                        child: _HeroContent(
-                          onPlay: () {
-                            _startGame(context, ref);
-                          },
-                        ),
-                      ),
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: _TopBar(
+                      onHistory: () => Navigator.of(
+                        context,
+                      ).pushNamed(HistoryScreen.routeName),
+                      onSettings: () => Navigator.of(
+                        context,
+                      ).pushNamed(SettingsScreen.routeName),
                     ),
                   ),
                 ],
@@ -263,11 +281,6 @@ class _HeroContentState extends State<_HeroContent>
                 pulseAnimation: _pulseController,
               ),
             ),
-          ),
-          const SizedBox(height: 24),
-          FadeTransition(
-            opacity: _buttonOpacity,
-            child: _QuickStats(colors: colors),
           ),
         ],
       ),
@@ -495,71 +508,6 @@ class _PlayButtonState extends State<_PlayButton> {
   }
 }
 
-class _QuickStats extends StatelessWidget {
-  const _QuickStats({required this.colors});
-
-  final AppColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _StatChip(
-          icon: Icons.smart_toy_rounded,
-          label: 'vs Engine',
-          colors: colors,
-        ),
-        const SizedBox(width: 12),
-        _StatChip(
-          icon: Icons.bolt_rounded,
-          label: 'Quick Match',
-          colors: colors,
-        ),
-      ],
-    );
-  }
-}
-
-class _StatChip extends StatelessWidget {
-  const _StatChip({
-    required this.icon,
-    required this.label,
-    required this.colors,
-  });
-
-  final IconData icon;
-  final String label;
-  final AppColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: colors.cardBackground.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colors.cardBorder.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: colors.accentPrimary),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: colors.textMuted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _FloatingPieces extends StatefulWidget {
   const _FloatingPieces();
 
@@ -582,6 +530,18 @@ class _FloatingPiecesState extends State<_FloatingPieces>
     '\u265C', // black rook
   ];
 
+  /// Normalized anchors biased to edges / corners so pieces frame the hero.
+  static const List<(double, double)> _anchors = [
+    (0.06, 0.22),
+    (0.94, 0.18),
+    (0.04, 0.52),
+    (0.96, 0.46),
+    (0.1, 0.86),
+    (0.9, 0.82),
+    (0.26, 0.08),
+    (0.74, 0.9),
+  ];
+
   late final List<_FloatingPieceData> _pieceData;
 
   @override
@@ -590,18 +550,21 @@ class _FloatingPiecesState extends State<_FloatingPieces>
     _controller = AnimationController(
       duration: const Duration(seconds: 20),
       vsync: this,
-    )..repeat();
+    )..repeat(reverse: true);
 
     final random = Random(42);
     _pieceData = List.generate(_pieces.length, (i) {
+      final anchor = _anchors[i];
+      final jitterX = (random.nextDouble() - 0.5) * 0.16;
+      final jitterY = (random.nextDouble() - 0.5) * 0.16;
       return _FloatingPieceData(
         piece: _pieces[i],
-        x: random.nextDouble(),
-        y: random.nextDouble(),
-        size: 22.0 + random.nextDouble() * 18,
-        speed: 0.3 + random.nextDouble() * 0.7,
+        x: (anchor.$1 + jitterX).clamp(0.02, 0.98),
+        y: (anchor.$2 + jitterY).clamp(0.04, 0.96),
+        size: 44 + random.nextDouble() * 40,
+        speed: 0.28 + random.nextDouble() * 0.72,
         phase: random.nextDouble() * 2 * pi,
-        opacity: 0.04 + random.nextDouble() * 0.06,
+        opacity: 0.075 + random.nextDouble() * 0.1,
       );
     });
   }
@@ -620,6 +583,7 @@ class _FloatingPiecesState extends State<_FloatingPieces>
       animation: _controller,
       builder: (context, _) {
         return Stack(
+          clipBehavior: Clip.none,
           children: [
             for (final p in _pieceData)
               Positioned(
@@ -628,7 +592,7 @@ class _FloatingPiecesState extends State<_FloatingPieces>
                 child: Transform.rotate(
                   angle:
                       sin(_controller.value * 2 * pi * p.speed + p.phase) *
-                      0.15,
+                      0.18,
                   child: Text(
                     p.piece,
                     style: TextStyle(
@@ -646,15 +610,15 @@ class _FloatingPiecesState extends State<_FloatingPieces>
 
   double _lerpX(_FloatingPieceData p, BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
-    final drift = sin(_controller.value * 2 * pi * p.speed + p.phase) * 20;
-    return p.x * width + drift;
+    final drift = sin(_controller.value * 2 * pi * p.speed + p.phase) * 28;
+    return p.x * width - p.size * 0.35 + drift;
   }
 
   double _lerpY(_FloatingPieceData p, BuildContext context) {
     final height = MediaQuery.sizeOf(context).height;
     final drift =
-        cos(_controller.value * 2 * pi * p.speed * 0.7 + p.phase) * 15;
-    return p.y * height + drift;
+        cos(_controller.value * 2 * pi * p.speed * 0.7 + p.phase) * 22;
+    return p.y * height - p.size * 0.45 + drift;
   }
 }
 
