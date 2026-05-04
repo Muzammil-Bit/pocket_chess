@@ -1,24 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../engine/chess_engine.dart';
-import '../models/game_mode.dart';
-import '../models/game_session.dart';
-import '../models/game_snapshot.dart';
-import '../models/game_status.dart';
-import '../models/move_option.dart';
-import '../models/move_result.dart';
-import '../models/piece_data.dart';
-import '../models/promotion_choice.dart';
-import '../models/saved_game.dart';
-import '../models/square_position.dart';
-import '../engine/package_chess_engine.dart';
-import '../ai/ai_move.dart';
+import '../../engine/chess_engine.dart';
+import '../../models/game_mode.dart';
+import '../../models/game_session.dart';
+import '../../models/game_snapshot.dart';
+import '../../models/game_status.dart';
+import '../../models/move_option.dart';
+import '../../models/move_result.dart';
+import '../../models/piece_data.dart';
+import '../../models/promotion_choice.dart';
+import '../../models/saved_game.dart';
+import '../../models/square_position.dart';
+import '../../engine/package_chess_engine.dart';
+import '../../ai/ai_move.dart';
+import '../../ai/ai_providers.dart';
+import '../../repositories/history_providers.dart';
 import 'game_recorder.dart';
+import 'game_session_controller.dart';
 import 'game_state.dart';
-import '../providers.dart';
 
 final chessEngineProvider = Provider<ChessEngine>(
   (ref) => PackageChessEngine(),
+);
+
+final gameControllerProvider = NotifierProvider<GameController, GameState>(
+  GameController.new,
 );
 
 class GameController extends Notifier<GameState> {

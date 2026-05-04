@@ -1,10 +1,10 @@
-import '../models/board_state.dart';
-import '../models/game_mode.dart';
-import '../models/game_status.dart';
-import '../models/game_session.dart';
-import '../models/move_option.dart';
-import '../models/piece_data.dart';
-import '../models/square_position.dart';
+import '../../models/board_state.dart';
+import '../../models/game_mode.dart';
+import '../../models/game_status.dart';
+import '../../models/game_session.dart';
+import '../../models/move_option.dart';
+import '../../models/piece_data.dart';
+import '../../models/square_position.dart';
 
 class GameState {
   const GameState({

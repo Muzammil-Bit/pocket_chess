@@ -3,11 +3,16 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../models/game_session.dart';
-import '../ai/stockfish_client.dart';
-import '../settings/app_settings_controller.dart';
+import '../../models/game_session.dart';
+import '../../ai/stockfish_client.dart';
+import '../../core/app_settings_controller.dart';
 
 const gameSessionPreferenceKey = 'last_game_session';
+
+final gameSessionProvider =
+    NotifierProvider<GameSessionController, GameSession>(
+      GameSessionController.new,
+    );
 
 class GameSessionController extends Notifier<GameSession> {
   late final SharedPreferences _preferences;

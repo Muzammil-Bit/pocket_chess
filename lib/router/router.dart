@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'game_screen.dart';
-import 'game_win_screen.dart';
-import 'history_screen.dart';
+import '../ui/game/game_screen.dart';
+import '../ui/game/game_win_screen.dart';
+import '../ui/history/history_screen.dart';
 import 'routes.dart';
-import 'settings_screen.dart';
-import 'start_screen.dart';
+import '../ui/settings/settings_screen.dart';
+import '../ui/home/start_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(

@@ -1,7 +1,7 @@
-import '../models/game_session.dart';
-import '../models/piece_data.dart';
-import '../models/saved_game.dart';
-import 'game_history_repository.dart';
+import '../../models/game_session.dart';
+import '../../models/piece_data.dart';
+import '../../models/saved_game.dart';
+import '../../repositories/game_history_repository.dart';
 
 class GameRecorder {
   GameRecorder(this._repository);

@@ -5,10 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:pocket_chess/app.dart';
-import 'package:pocket_chess/settings/app_settings_controller.dart';
-import 'package:pocket_chess/game/game_history_repository.dart';
-import 'package:pocket_chess/settings/piece_theme_catalog.dart';
-import 'package:pocket_chess/providers.dart';
+import 'package:pocket_chess/core/app_settings_controller.dart';
+import 'package:pocket_chess/repositories/game_history_repository.dart';
+import 'package:pocket_chess/core/piece_theme_catalog.dart';
+import 'package:pocket_chess/repositories/history_providers.dart';
 import 'package:pocket_chess/models/game_session.dart';
 import 'package:pocket_chess/models/piece_data.dart';
 import 'package:pocket_chess/models/piece_theme_option.dart';

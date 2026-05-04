@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'app_colors.dart';
-import 'pre_game_sheet.dart';
-import 'routes.dart';
+import '../../core/app_colors.dart';
+import '../game/pre_game_sheet.dart';
+import '../../router/routes.dart';
 
 class StartScreen extends ConsumerWidget {
   const StartScreen({super.key});

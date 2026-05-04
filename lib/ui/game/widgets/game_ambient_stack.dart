@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../app_colors.dart';
+import '../../../core/app_colors.dart';
 
 /// Decorative background layers used on play and victory screens (orbs +
 /// faint field arcs).

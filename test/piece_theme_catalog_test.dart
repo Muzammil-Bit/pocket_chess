@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pocket_chess/settings/piece_theme_catalog.dart';
+import 'package:pocket_chess/core/piece_theme_catalog.dart';
 
 void main() {
   test('catalog keeps complete standard sets and rejects special cases', () {

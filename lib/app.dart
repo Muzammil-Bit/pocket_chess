@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'settings/app_settings_controller.dart';
-import 'ui/app_colors.dart';
-import 'ui/router.dart';
+import 'core/app_settings_controller.dart';
+import 'core/app_colors.dart';
+import 'router/router.dart';
 
 class ChessApp extends ConsumerWidget {
   const ChessApp({super.key});

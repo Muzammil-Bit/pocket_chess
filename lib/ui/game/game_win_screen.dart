@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../settings/app_settings_controller.dart';
-import '../providers.dart';
-import '../models/game_status.dart';
-import 'app_colors.dart';
-import 'routes.dart';
-import 'widgets/chess_board.dart';
+import '../../core/app_settings_controller.dart';
+import 'game_controller.dart';
+import '../../models/game_status.dart';
+import '../../core/app_colors.dart';
+import '../../router/routes.dart';
+import '../widgets/chess_board.dart';
 import 'widgets/game_board_shell.dart';
 import 'widgets/game_players_header.dart';
 

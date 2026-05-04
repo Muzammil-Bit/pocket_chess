@@ -1,20 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'models/game_session.dart';
-import 'models/saved_game.dart';
-import 'history/json_game_history_repository.dart';
-import 'ai/ai_strategy.dart';
-import 'ai/minimax_ai_strategy.dart';
-import 'ai/stockfish_ai_strategy.dart';
-import 'ai/stockfish_client.dart';
-import 'game/game_controller.dart';
-import 'game/game_history_repository.dart';
-import 'game/game_session_controller.dart';
-import 'game/game_state.dart';
-
-final gameControllerProvider = NotifierProvider<GameController, GameState>(
-  GameController.new,
-);
+import '../models/game_session.dart';
+import 'ai_strategy.dart';
+import 'minimax_ai_strategy.dart';
+import 'stockfish_ai_strategy.dart';
+import 'stockfish_client.dart';
 
 final stockfishSupportedProvider = Provider<bool>((ref) {
   final client = createStockfishClient();
@@ -57,24 +47,4 @@ final aiStrategyFactoryProvider = Provider<AiStrategyFactory>((ref) {
     minimax: ref.watch(minimaxAiStrategyProvider),
     stockfish: ref.watch(stockfishAiStrategyProvider),
   );
-});
-
-final gameSessionProvider =
-    NotifierProvider<GameSessionController, GameSession>(
-      GameSessionController.new,
-    );
-
-final gameHistoryRepositoryProvider = Provider<GameHistoryRepository>((ref) {
-  return JsonGameHistoryRepository();
-});
-
-final savedGameHeadersProvider = FutureProvider<List<SavedGameHeader>>((ref) {
-  return ref.watch(gameHistoryRepositoryProvider).loadHeaders();
-});
-
-final savedGameDetailProvider = FutureProvider.family<SavedGameDetail?, String>((
-  ref,
-  id,
-) {
-  return ref.watch(gameHistoryRepositoryProvider).loadGame(id);
 });

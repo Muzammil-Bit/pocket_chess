@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../models/game_mode.dart';
-import '../../models/game_session.dart';
-import '../../models/piece_data.dart';
-import '../app_colors.dart';
+import '../../../models/game_mode.dart';
+import '../../../models/game_session.dart';
+import '../../../models/piece_data.dart';
+import '../../../core/app_colors.dart';
 
 /// Top row with White / timer / Black, matching labels to [GameSession] roles.
 class GamePlayersHeader extends StatelessWidget {

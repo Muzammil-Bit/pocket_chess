@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../settings/app_settings_controller.dart';
-import '../providers.dart';
-import '../models/game_mode.dart';
-import '../models/move_option.dart';
-import '../models/piece_data.dart';
-import '../models/saved_game.dart';
-import '../models/square_position.dart';
-import 'app_colors.dart';
-import 'routes.dart';
-import 'widgets/chess_board.dart';
+import '../../core/app_settings_controller.dart';
+import '../../repositories/history_providers.dart';
+import '../../models/game_mode.dart';
+import '../../models/move_option.dart';
+import '../../models/piece_data.dart';
+import '../../models/saved_game.dart';
+import '../../models/square_position.dart';
+import '../../core/app_colors.dart';
+import '../../router/routes.dart';
+import '../widgets/chess_board.dart';
 
 const _defaultStartFen =
     'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';

@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
-import '../game/game_history_repository.dart';
+import 'game_history_repository.dart';
 import '../models/game_session.dart';
 import '../models/piece_data.dart';
 import '../models/saved_game.dart';

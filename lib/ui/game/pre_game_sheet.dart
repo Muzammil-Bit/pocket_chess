@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../providers.dart';
-import '../models/ai_difficulty.dart';
-import '../models/game_mode.dart';
-import '../models/game_session.dart';
-import 'app_colors.dart';
-import 'router.dart';
-import 'routes.dart';
+import '../../ai/ai_providers.dart';
+import 'game_controller.dart';
+import 'game_session_controller.dart';
+import '../../models/ai_difficulty.dart';
+import '../../models/game_mode.dart';
+import '../../models/game_session.dart';
+import '../../core/app_colors.dart';
+import '../../router/router.dart';
+import '../../router/routes.dart';
 
 Future<GameSession?> showPreGameSheet(
   BuildContext context, {
@@ -152,7 +154,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                           alignment: Alignment.topCenter,
                           children: [
                             ...previousChildren,
-                            if (currentChild != null) currentChild,
+                            ?currentChild,
                           ],
                         );
                       },

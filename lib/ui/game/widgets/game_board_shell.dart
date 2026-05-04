@@ -2,10 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../models/piece_data.dart';
-import '../../models/piece_theme_option.dart';
-import '../app_colors.dart';
-import 'themed_piece_icon.dart';
+import '../../../models/piece_data.dart';
+import '../../../models/piece_theme_option.dart';
+import '../../../core/app_colors.dart';
+import '../../widgets/themed_piece_icon.dart';
 
 class ChessBoardCapturedStrip extends StatelessWidget {
   const ChessBoardCapturedStrip({

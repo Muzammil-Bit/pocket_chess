@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../settings/app_settings_controller.dart';
-import '../models/piece_data.dart';
-import '../models/piece_theme_option.dart';
-import 'app_colors.dart';
-import 'widgets/themed_piece_icon.dart';
+import '../../core/app_settings_controller.dart';
+import '../../models/piece_data.dart';
+import '../../models/piece_theme_option.dart';
+import '../../core/app_colors.dart';
+import '../widgets/themed_piece_icon.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
