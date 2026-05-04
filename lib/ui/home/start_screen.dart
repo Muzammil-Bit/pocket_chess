@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -6,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/app_colors.dart';
-import '../game/pre_game_sheet.dart';
 import '../../router/routes.dart';
 
 class StartScreen extends ConsumerWidget {
@@ -63,11 +61,7 @@ class StartScreen extends ConsumerWidget {
                               child: Transform.translate(
                                 offset: const Offset(0, -28),
                                 child: _HeroContent(
-                                  onPlay: () {
-                                    unawaited(
-                                      _openPreGameAndNavigate(context, ref),
-                                    );
-                                  },
+                                  onPlay: () => context.push(Routes.preGame),
                                 ),
                               ),
                             ),
@@ -93,17 +87,6 @@ class StartScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-Future<void> _openPreGameAndNavigate(
-  BuildContext context,
-  WidgetRef ref,
-) async {
-  final session = await showPreGameSheet(context, ref: ref);
-  if (session == null || !context.mounted) {
-    return;
-  }
-  context.push(Routes.game);
 }
 
 class _TopBar extends StatelessWidget {

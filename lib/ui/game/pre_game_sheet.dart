@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../ai/ai_providers.dart';
 import 'game_controller.dart';
@@ -9,38 +10,16 @@ import '../../models/game_mode.dart';
 import '../../models/game_session.dart';
 import '../../models/time_control.dart';
 import '../../core/app_colors.dart';
+import '../../router/routes.dart';
 
-Future<GameSession?> showPreGameSheet(
-  BuildContext context, {
-  required WidgetRef ref,
-}) {
-  return showModalBottomSheet<GameSession>(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) {
-      return _PreGameSheetBody(
-        initialSession: ref.read(gameSessionProvider),
-        stockfishSupported: ref.read(stockfishSupportedProvider),
-      );
-    },
-  );
-}
-
-class _PreGameSheetBody extends ConsumerStatefulWidget {
-  const _PreGameSheetBody({
-    required this.initialSession,
-    required this.stockfishSupported,
-  });
-
-  final GameSession initialSession;
-  final bool stockfishSupported;
+class PreGameScreen extends ConsumerStatefulWidget {
+  const PreGameScreen({super.key});
 
   @override
-  ConsumerState<_PreGameSheetBody> createState() => _PreGameSheetBodyState();
+  ConsumerState<PreGameScreen> createState() => _PreGameScreenState();
 }
 
-class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
+class _PreGameScreenState extends ConsumerState<PreGameScreen> {
   late GameSession _session;
   bool _isStarting = false;
 
@@ -60,155 +39,162 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
     if (!mounted) {
       return;
     }
-    Navigator.of(context).pop(_session);
+    context.pushReplacement(Routes.game);
   }
 
   @override
   void initState() {
     super.initState();
-    _session = widget.initialSession.normalized(
-      stockfishSupported: widget.stockfishSupported,
+    final initialSession = ref.read(gameSessionProvider);
+    final stockfishSupported = ref.read(stockfishSupportedProvider);
+    _session = initialSession.normalized(
+      stockfishSupported: stockfishSupported,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
-    final theme = Theme.of(context);
     final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+    return Scaffold(
+      backgroundColor: colors.gradientColors.first,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        foregroundColor: colors.textHeading,
+        elevation: 0,
+        centerTitle: true,
+        automaticallyImplyLeading: false,
+        surfaceTintColor: Colors.transparent,
+        title: Column(
+          children: [
+            Text(
+              'New match',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.2,
+                color: colors.textHeading,
+              ),
+            ),
+            Text(
+              'Choose your game mode and configure the engine.',
+              style: TextStyle(
+                color: colors.textMuted,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
-      child: SafeArea(
-        top: false,
-        child: AbsorbPointer(
-          absorbing: _isStarting,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 42,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: colors.textMuted.withValues(alpha: 0.35),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          'New match',
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.w800,
-                          ),
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: colors.gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: SafeArea(
+          child: AbsorbPointer(
+            absorbing: _isStarting,
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 24),
+                        _ModeSelector(
+                          selected: _session.mode,
+                          onChanged: (mode) {
+                            setState(() {
+                              _session = _sessionForMode(mode);
+                            });
+                          },
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Choose your game mode and configure the engine.',
-                    style: TextStyle(color: colors.textMuted, fontSize: 13),
-                  ),
-                  const SizedBox(height: 24),
-
-                  _ModeSelector(
-                    selected: _session.mode,
-                    onChanged: (mode) {
-                      setState(() {
-                        _session = _sessionForMode(mode);
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    alignment: Alignment.topCenter,
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 250),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      layoutBuilder: (currentChild, previousChildren) {
-                        return Stack(
+                        const SizedBox(height: 20),
+                        AnimatedSize(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
                           alignment: Alignment.topCenter,
-                          children: [
-                            ...previousChildren,
-                            ?currentChild,
-                          ],
-                        );
-                      },
-                      child: _buildModeContent(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 20),
-                  _TimeControlSelector(
-                    selected: _session.timeControl,
-                    onChanged: (tc) {
-                      setState(() {
-                        if (tc == null) {
-                          _session = _session.copyWith(clearTimeControl: true);
-                        } else {
-                          _session = _session.copyWith(timeControl: tc);
-                        }
-                      });
-                    },
-                  ),
-
-                  if (!widget.stockfishSupported) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.amber.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.amber.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.info_outline_rounded,
-                            size: 18,
-                            color: Colors.amber.withValues(alpha: 0.7),
+                          child: AnimatedSwitcher(
+                            duration: const Duration(milliseconds: 250),
+                            switchInCurve: Curves.easeOut,
+                            switchOutCurve: Curves.easeIn,
+                            layoutBuilder: (currentChild, previousChildren) {
+                              return Stack(
+                                alignment: Alignment.topCenter,
+                                children: [...previousChildren, ?currentChild],
+                              );
+                            },
+                            child: _buildModeContent(),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'Stockfish is only available on Android & iOS. '
-                              'This device will use minimax.',
-                              style: TextStyle(
-                                color: colors.textMuted,
-                                fontSize: 12,
-                                height: 1.4,
+                        ),
+                        const SizedBox(height: 20),
+                        _TimeControlSelector(
+                          selected: _session.timeControl,
+                          onChanged: (tc) {
+                            setState(() {
+                              if (tc == null) {
+                                _session = _session.copyWith(
+                                  clearTimeControl: true,
+                                );
+                              } else {
+                                _session = _session.copyWith(timeControl: tc);
+                              }
+                            });
+                          },
+                        ),
+                        if (!ref.watch(stockfishSupportedProvider)) ...[
+                          const SizedBox(height: 16),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Colors.amber.withValues(alpha: 0.2),
                               ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline_rounded,
+                                  size: 18,
+                                  color: Colors.amber.withValues(alpha: 0.7),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    'Stockfish is only available on Android & iOS. '
+                                    'This device will use minimax.',
+                                    style: TextStyle(
+                                      color: colors.textMuted,
+                                      fontSize: 12,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
-                      ),
+                      ],
                     ),
-                  ],
-                  const SizedBox(height: 24),
-                  Row(
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20, 12, 20, 20 + bottomInset),
+                  child: Row(
                     children: [
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _isStarting
-                              ? null
-                              : () => Navigator.of(context).pop(),
+                          onPressed: _isStarting ? null : () => context.pop(),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: colors.textMuted,
                             side: BorderSide(color: colors.panelBorder),
@@ -251,8 +237,8 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                       ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
@@ -269,7 +255,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
           title: 'Opponent AI',
           subtitle: 'You play White — the engine replies as Black.',
           config: _session.blackAi!,
-          stockfishSupported: widget.stockfishSupported,
+          stockfishSupported: ref.watch(stockfishSupportedProvider),
           onChanged: (config) {
             setState(() {
               _session = _session.copyWith(blackAi: config);
@@ -293,7 +279,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
               title: 'White AI',
               subtitle: 'Configure the White engine and strength.',
               config: _session.whiteAi!,
-              stockfishSupported: widget.stockfishSupported,
+              stockfishSupported: ref.watch(stockfishSupportedProvider),
               onChanged: (config) {
                 setState(() {
                   _session = _session.copyWith(whiteAi: config);
@@ -306,7 +292,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
               title: 'Black AI',
               subtitle: 'Configure the Black engine and strength.',
               config: _session.blackAi!,
-              stockfishSupported: widget.stockfishSupported,
+              stockfishSupported: ref.watch(stockfishSupportedProvider),
               onChanged: (config) {
                 setState(() {
                   _session = _session.copyWith(blackAi: config);
@@ -330,7 +316,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                 difficulty: AiDifficulty.medium,
               ),
           timeControl: _session.timeControl,
-        ).normalized(stockfishSupported: widget.stockfishSupported);
+        ).normalized(stockfishSupported: ref.read(stockfishSupportedProvider));
       case GameMode.localTwoPlayer:
         return GameSession(
           mode: GameMode.localTwoPlayer,
@@ -353,7 +339,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                 difficulty: AiDifficulty.medium,
               ),
           timeControl: _session.timeControl,
-        ).normalized(stockfishSupported: widget.stockfishSupported);
+        ).normalized(stockfishSupported: ref.read(stockfishSupportedProvider));
     }
   }
 }
@@ -768,10 +754,7 @@ class _InfoCard extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 class _TimeControlSelector extends StatelessWidget {
-  const _TimeControlSelector({
-    required this.selected,
-    required this.onChanged,
-  });
+  const _TimeControlSelector({required this.selected, required this.onChanged});
 
   final TimeControl? selected;
   final ValueChanged<TimeControl?> onChanged;

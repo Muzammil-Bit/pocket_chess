@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../ui/game/pre_game_sheet.dart';
 import '../ui/game/game_screen.dart';
 import '../ui/game/game_win_screen.dart';
 import '../ui/history/history_screen.dart';
@@ -15,6 +16,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.home,
         builder: (context, state) => const StartScreen(),
+      ),
+      GoRoute(
+        path: Routes.preGame,
+        builder: (context, state) => const PreGameScreen(),
       ),
       GoRoute(
         path: Routes.game,
@@ -34,9 +39,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/history/:gameId',
-        builder: (context, state) => HistoryDetailScreen(
-          gameId: state.pathParameters['gameId']!,
-        ),
+        builder: (context, state) =>
+            HistoryDetailScreen(gameId: state.pathParameters['gameId']!),
       ),
     ],
   );
