@@ -41,14 +41,6 @@ flutter pub get
 flutter run
 ```
 
-To run a specific platform target:
-
-```bash
-flutter run -d chrome
-flutter run -d macos
-flutter run -d android
-```
-
 ## AI Support Notes
 
 - `Minimax` is available on every platform.
