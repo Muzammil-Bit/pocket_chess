@@ -2,6 +2,16 @@
 
 Pocket Chess is a polished Flutter chess app for quick games, local pass-and-play matches, and engine battles. It ships with multiple game modes, configurable AI opponents, persistent game history, time controls, and a large catalog of chess piece themes.
 
+## Screenshots
+
+<p align="center">
+  <img src="screenshots/1.png" alt="Pocket Chess home screen" width="18%" />
+  <img src="screenshots/2.png" alt="Pocket Chess new game setup" width="18%" />
+  <img src="screenshots/3.png" alt="Pocket Chess game screen" width="18%" />
+  <img src="screenshots/4.png" alt="Pocket Chess history screen" width="18%" />
+  <img src="screenshots/5.png" alt="Pocket Chess settings screen" width="18%" />
+</p>
+
 ## Features
 
 - Human vs AI, local two-player, and AI vs AI modes
