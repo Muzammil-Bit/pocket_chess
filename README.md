@@ -88,7 +88,9 @@ assets/pieces/    bundled chess piece themes and per-theme licenses
 
 ## Open Source Notes
 
-This repository includes third-party chess piece assets under `assets/pieces/`. Many themes include their own `license.md` or `license.txt` files. If you publish this project, keep those notices intact and review them before redistributing the app or repackaging the assets.
+The project code is licensed under the MIT License. See [LICENSE](/Users/muzammil/Documents/playground/chess/LICENSE).
+
+This repository includes third-party chess piece assets under `assets/pieces/`. Many themes include their own `license.md` or `license.txt` files. Those asset licenses remain in effect for the bundled piece sets, so keep those notices intact when redistributing the app or repackaging the assets.
 
 ## Roadmap Ideas
 
