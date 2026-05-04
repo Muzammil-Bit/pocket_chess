@@ -9,8 +9,6 @@ import '../../models/game_mode.dart';
 import '../../models/game_session.dart';
 import '../../models/time_control.dart';
 import '../../core/app_colors.dart';
-import '../../router/router.dart';
-import '../../router/routes.dart';
 
 Future<GameSession?> showPreGameSheet(
   BuildContext context, {
@@ -114,14 +112,6 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                      ),
-                      _GlassButton(
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          ref.read(routerProvider).push(Routes.history);
-                        },
-                        icon: Icons.history_rounded,
-                        label: 'History',
                       ),
                     ],
                   ),
@@ -768,54 +758,6 @@ class _InfoCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Glass-style button (header action)
-// ---------------------------------------------------------------------------
-
-class _GlassButton extends StatelessWidget {
-  const _GlassButton({
-    required this.onTap,
-    required this.icon,
-    required this.label,
-  });
-
-  final VoidCallback onTap;
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.appColors;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: colors.panelBackground.withValues(alpha: 0.5),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.panelBorder.withValues(alpha: 0.4)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: colors.textMuted),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: colors.textMuted,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
