@@ -13,6 +13,7 @@ dependencies:
   chess: ^0.8.1
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
+  go_router: ^14.0.0
   chessground: ^9.0.0
   dartchess: ^0.12.3
   fast_immutable_collections: ^11.2.0

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:chessground/chessground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../application/app_settings_controller.dart';
 import '../application/game_controller.dart';
@@ -13,7 +14,6 @@ import '../domain/models/game_session.dart';
 import '../domain/models/game_status.dart';
 import '../domain/models/piece_data.dart';
 import 'app_colors.dart';
-import 'game_win_screen.dart';
 import 'widgets/chess_board.dart';
 import 'widgets/game_ambient_stack.dart';
 import 'widgets/game_board_shell.dart';
@@ -22,8 +22,6 @@ import 'widgets/promotion_dialog.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
-
-  static const routeName = '/game';
 
   @override
   ConsumerState<GameScreen> createState() => _GameScreenState();
@@ -51,7 +49,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
       if (!mounted) {
         return;
       }
-      Navigator.of(context).pop();
+      context.pop();
     } finally {
       _handlingBack = false;
     }
@@ -90,7 +88,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!context.mounted) return;
-          Navigator.of(context).pushNamed(GameWinScreen.routeName);
+          context.push('/game/win');
         });
       },
     );

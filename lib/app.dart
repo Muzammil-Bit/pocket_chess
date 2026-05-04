@@ -3,11 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'application/app_settings_controller.dart';
 import 'presentation/app_colors.dart';
-import 'presentation/game_screen.dart';
-import 'presentation/game_win_screen.dart';
-import 'presentation/history_screen.dart';
-import 'presentation/settings_screen.dart';
-import 'presentation/start_screen.dart';
+import 'presentation/router.dart';
 
 class ChessApp extends ConsumerWidget {
   const ChessApp({super.key});
@@ -15,41 +11,15 @@ class ChessApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(appSettingsProvider.select((s) => s.themeMode));
+    final router = ref.watch(routerProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Pocket Chess',
       debugShowCheckedModeBanner: false,
       themeMode: themeMode,
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
-      home: const StartScreen(),
-      onGenerateRoute: (settings) {
-        if (settings.name == GameScreen.routeName) {
-          return MaterialPageRoute<void>(
-            builder: (_) => const GameScreen(),
-            settings: settings,
-          );
-        }
-        if (settings.name == GameWinScreen.routeName) {
-          return MaterialPageRoute<void>(
-            builder: (_) => const GameWinScreen(),
-            settings: settings,
-          );
-        }
-        if (settings.name == SettingsScreen.routeName) {
-          return MaterialPageRoute<void>(
-            builder: (_) => const SettingsScreen(),
-            settings: settings,
-          );
-        }
-        if (settings.name == HistoryScreen.routeName) {
-          return MaterialPageRoute<void>(
-            builder: (_) => const HistoryScreen(),
-            settings: settings,
-          );
-        }
-        return null;
-      },
+      routerConfig: router,
     );
   }
 

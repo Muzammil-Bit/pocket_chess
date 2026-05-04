@@ -1,6 +1,7 @@
 import 'package:chessground/chessground.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../application/app_settings_controller.dart';
 import '../application/providers.dart';
@@ -21,8 +22,6 @@ const _defaultStartFen =
 
 class HistoryScreen extends ConsumerWidget {
   const HistoryScreen({super.key});
-
-  static const routeName = '/history';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -181,11 +180,7 @@ class _GameCard extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => HistoryDetailScreen(gameId: game.id),
-          ),
-        );
+        context.push('/history/${game.id}');
       },
       child: Container(
         padding: const EdgeInsets.all(14),

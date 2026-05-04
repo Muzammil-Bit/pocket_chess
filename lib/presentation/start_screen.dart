@@ -3,12 +3,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'app_colors.dart';
-import 'game_screen.dart';
-import 'history_screen.dart';
 import 'pre_game_sheet.dart';
-import 'settings_screen.dart';
 
 class StartScreen extends ConsumerWidget {
   const StartScreen({super.key});
@@ -82,12 +80,8 @@ class StartScreen extends ConsumerWidget {
                     left: 0,
                     right: 0,
                     child: _TopBar(
-                      onHistory: () => Navigator.of(
-                        context,
-                      ).pushNamed(HistoryScreen.routeName),
-                      onSettings: () => Navigator.of(
-                        context,
-                      ).pushNamed(SettingsScreen.routeName),
+                      onHistory: () => context.push('/history'),
+                      onSettings: () => context.push('/settings'),
                     ),
                   ),
                 ],
@@ -108,7 +102,7 @@ Future<void> _openPreGameAndNavigate(
   if (session == null || !context.mounted) {
     return;
   }
-  Navigator.of(context).pushNamed(GameScreen.routeName);
+  context.push('/game');
 }
 
 class _TopBar extends StatelessWidget {

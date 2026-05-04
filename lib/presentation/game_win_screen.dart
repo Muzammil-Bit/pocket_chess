@@ -4,6 +4,7 @@ import 'package:chessground/chessground.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../application/app_settings_controller.dart';
 import '../application/providers.dart';
@@ -15,8 +16,6 @@ import 'widgets/game_players_header.dart';
 
 class GameWinScreen extends ConsumerStatefulWidget {
   const GameWinScreen({super.key});
-
-  static const routeName = '/game/win';
 
   @override
   ConsumerState<GameWinScreen> createState() => _GameWinScreenState();
@@ -151,7 +150,7 @@ class _GameWinScreenState extends ConsumerState<GameWinScreen>
 
     if (state.status.phase != GamePhase.checkmate || winner == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) Navigator.of(context).maybePop();
+        if (mounted && context.canPop()) context.pop();
       });
       return const Scaffold(body: SizedBox.shrink());
     }
@@ -188,7 +187,9 @@ class _GameWinScreenState extends ConsumerState<GameWinScreen>
           surfaceTintColor: Colors.transparent,
           leading: IconButton(
             icon: const Icon(Icons.close_rounded),
-            onPressed: () => Navigator.of(context).maybePop(),
+            onPressed: () {
+              if (context.canPop()) context.pop();
+            },
           ),
         ),
         body: DecoratedBox(
@@ -360,7 +361,7 @@ class _GameWinScreenState extends ConsumerState<GameWinScreen>
                                     opacity: _buttonsOpacity.value,
                                     child: _ActionButtons(
                                       onPlayAgain: () {
-                                        Navigator.of(context).pop();
+                                        context.pop();
                                         ref
                                             .read(
                                               gameControllerProvider.notifier,
@@ -368,9 +369,7 @@ class _GameWinScreenState extends ConsumerState<GameWinScreen>
                                             .resetGame();
                                       },
                                       onBackToMenu: () {
-                                        Navigator.of(context)
-                                          ..pop()
-                                          ..pop();
+                                        context.go('/');
                                       },
                                       accentColor: accentColor,
                                     ),

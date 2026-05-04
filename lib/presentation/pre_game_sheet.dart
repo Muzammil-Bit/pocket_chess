@@ -6,7 +6,7 @@ import '../domain/models/ai_difficulty.dart';
 import '../domain/models/game_mode.dart';
 import '../domain/models/game_session.dart';
 import 'app_colors.dart';
-import 'history_screen.dart';
+import 'router.dart';
 
 Future<GameSession?> showPreGameSheet(
   BuildContext context, {
@@ -113,9 +113,8 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                       ),
                       _GlassButton(
                         onTap: () {
-                          Navigator.of(
-                            context,
-                          ).pushNamed(HistoryScreen.routeName);
+                          Navigator.of(context).pop();
+                          ref.read(routerProvider).push('/history');
                         },
                         icon: Icons.history_rounded,
                         label: 'History',

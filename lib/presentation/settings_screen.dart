@@ -10,8 +10,6 @@ import 'widgets/themed_piece_icon.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
-  static const routeName = '/settings';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.appColors;
