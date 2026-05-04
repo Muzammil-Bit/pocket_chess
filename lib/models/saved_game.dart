@@ -2,7 +2,7 @@ import 'game_mode.dart';
 import 'game_session.dart';
 import 'piece_data.dart';
 
-enum SavedGameResultKind { checkmate, stalemate, draw, abandoned }
+enum SavedGameResultKind { checkmate, stalemate, draw, abandoned, timeout }
 
 class RecordedMove {
   const RecordedMove({
@@ -191,6 +191,14 @@ extension SavedGameResultKindX on SavedGameResultKind {
         return 'Draw';
       case SavedGameResultKind.abandoned:
         return 'Abandoned';
+      case SavedGameResultKind.timeout:
+        if (winner == PieceSide.white) {
+          return 'White won on time';
+        }
+        if (winner == PieceSide.black) {
+          return 'Black won on time';
+        }
+        return 'Timeout';
     }
   }
 }

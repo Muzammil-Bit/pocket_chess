@@ -83,7 +83,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
     ref.listen<GameStatus>(
       gameControllerProvider.select((value) => value.status),
       (previous, next) {
-        if (next.phase != GamePhase.checkmate || next.winner == null) return;
+        if ((next.phase != GamePhase.checkmate && next.phase != GamePhase.timeout) || next.winner == null) return;
         if (previous?.isGameOver ?? false) return;
 
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -166,6 +166,7 @@ class _GameScreenState extends ConsumerState<GameScreen> {
                                 GamePlayersHeader(
                                   session: state.session,
                                   activeSide: state.turn,
+                                  gameState: state,
                                 ),
                                 const SizedBox(height: 20),
                                 ChessBoardStage(
@@ -298,13 +299,10 @@ class _ActionRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Expanded(
           child: _ActionButton(label: 'Resign', icon: Icons.flag_outlined),
-        ),
-        const SizedBox(width: 12),
-        const Expanded(
-          child: _ActionButton(label: 'Draw', icon: Icons.handshake_outlined),
         ),
         const SizedBox(width: 12),
         Expanded(

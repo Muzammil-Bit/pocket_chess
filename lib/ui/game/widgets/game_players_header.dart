@@ -6,6 +6,7 @@ import '../../../models/game_mode.dart';
 import '../../../models/game_session.dart';
 import '../../../models/piece_data.dart';
 import '../../../core/app_colors.dart';
+import '../game_state.dart';
 
 /// Top row with White / timer / Black, matching labels to [GameSession] roles.
 class GamePlayersHeader extends StatelessWidget {
@@ -13,10 +14,12 @@ class GamePlayersHeader extends StatelessWidget {
     super.key,
     required this.session,
     required this.activeSide,
+    required this.gameState,
   });
 
   final GameSession session;
   final PieceSide activeSide;
+  final GameState gameState;
 
   static String participantLabel(GameSession session, PieceSide side) {
     if (session.mode == GameMode.localTwoPlayer) {
@@ -45,7 +48,7 @@ class GamePlayersHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        const GameTimerPlaceholder(time: '05:00'),
+        _buildTimer(context),
         const SizedBox(width: 12),
         Expanded(
           child: GamePlayerAvatar(
@@ -58,6 +61,26 @@ class GamePlayersHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildTimer(BuildContext context) {
+    if (!gameState.isTimed) {
+      return const GameTimerPlaceholder(time: '∞');
+    }
+    final activeTime = gameState.timeFor(activeSide) ?? Duration.zero;
+    final initialTime = session.timeControl!.initialTime;
+    final progress = initialTime.inMilliseconds > 0
+        ? (activeTime.inMilliseconds / initialTime.inMilliseconds).clamp(0.0, 1.0)
+        : 0.0;
+    final timeStr = _formatDuration(activeTime);
+    return GameTimerPlaceholder(time: timeStr, progress: progress);
+  }
+
+  static String _formatDuration(Duration d) {
+    if (d <= Duration.zero) return '0:00';
+    final minutes = d.inMinutes;
+    final seconds = d.inSeconds % 60;
+    return '$minutes:${seconds.toString().padLeft(2, '0')}';
   }
 
   static String _initialsFor(GameSession session, PieceSide side) {
@@ -189,29 +212,37 @@ class GamePlayerAvatar extends StatelessWidget {
 
 /// Placeholder clock ring (matches in-game shell).
 class GameTimerPlaceholder extends StatelessWidget {
-  const GameTimerPlaceholder({super.key, required this.time});
+  const GameTimerPlaceholder({
+    super.key,
+    required this.time,
+    this.progress = 1.0,
+  });
 
   final String time;
+  final double progress;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.appColors;
+    final isLow = progress < 0.2 && progress > 0;
 
     return SizedBox(
       width: 72,
       height: 72,
       child: CustomPaint(
         painter: GameClockRingPainter(
-          progress: 1.0,
+          progress: progress,
           trackColor: colors.panelBorder.withValues(alpha: 0.2),
-          fillColor: colors.activeIndicator,
-          glowColor: colors.activeIndicator.withValues(alpha: 0.3),
+          fillColor: isLow ? Colors.redAccent : colors.activeIndicator,
+          glowColor: isLow
+              ? Colors.redAccent.withValues(alpha: 0.3)
+              : colors.activeIndicator.withValues(alpha: 0.3),
         ),
         child: Center(
           child: Text(
             time,
             style: TextStyle(
-              color: colors.textHeading,
+              color: isLow ? Colors.redAccent : colors.textHeading,
               fontSize: 15,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.3,

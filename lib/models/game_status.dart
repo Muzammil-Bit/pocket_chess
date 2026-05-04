@@ -1,6 +1,6 @@
 import 'piece_data.dart';
 
-enum GamePhase { active, checkmate, stalemate, draw }
+enum GamePhase { active, checkmate, stalemate, draw, timeout }
 
 class GameStatus {
   const GameStatus({required this.phase, required this.inCheck, this.winner});

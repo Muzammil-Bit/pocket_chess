@@ -1,6 +1,7 @@
 import 'ai_difficulty.dart';
 import 'game_mode.dart';
 import 'piece_data.dart';
+import 'time_control.dart';
 
 enum AiEngineKind { minimax, stockfish }
 
@@ -63,12 +64,14 @@ class GameSession {
     this.whiteAi,
     this.blackAi,
     this.aiMoveDelay = const Duration(milliseconds: 450),
+    this.timeControl,
   });
 
   final GameMode mode;
   final GameAiConfig? whiteAi;
   final GameAiConfig? blackAi;
   final Duration aiMoveDelay;
+  final TimeControl? timeControl;
 
   factory GameSession.defaultSession() {
     return const GameSession(
@@ -98,12 +101,15 @@ class GameSession {
     GameAiConfig? blackAi,
     bool clearBlackAi = false,
     Duration? aiMoveDelay,
+    TimeControl? timeControl,
+    bool clearTimeControl = false,
   }) {
     return GameSession(
       mode: mode ?? this.mode,
       whiteAi: clearWhiteAi ? null : whiteAi ?? this.whiteAi,
       blackAi: clearBlackAi ? null : blackAi ?? this.blackAi,
       aiMoveDelay: aiMoveDelay ?? this.aiMoveDelay,
+      timeControl: clearTimeControl ? null : timeControl ?? this.timeControl,
     );
   }
 
@@ -130,9 +136,14 @@ class GameSession {
                 difficulty: AiDifficulty.medium,
               ),
           aiMoveDelay: aiMoveDelay,
+          timeControl: timeControl,
         );
       case GameMode.localTwoPlayer:
-        return GameSession(mode: mode, aiMoveDelay: aiMoveDelay);
+        return GameSession(
+          mode: mode,
+          aiMoveDelay: aiMoveDelay,
+          timeControl: timeControl,
+        );
       case GameMode.aiVsAi:
         return GameSession(
           mode: mode,
@@ -147,6 +158,7 @@ class GameSession {
                 difficulty: AiDifficulty.medium,
               ),
           aiMoveDelay: aiMoveDelay,
+          timeControl: timeControl,
         );
     }
   }
@@ -156,6 +168,7 @@ class GameSession {
     'whiteAi': whiteAi?.toJson(),
     'blackAi': blackAi?.toJson(),
     'aiMoveDelayMs': aiMoveDelay.inMilliseconds,
+    'timeControl': timeControl?.toJson(),
   };
 
   static GameSession fromJson(Map<String, dynamic> json) {
@@ -178,6 +191,9 @@ class GameSession {
       aiMoveDelay: Duration(
         milliseconds: (json['aiMoveDelayMs'] as int?) ?? 450,
       ),
+      timeControl: json['timeControl'] is Map<String, dynamic>
+          ? TimeControl.fromJson(json['timeControl'] as Map<String, dynamic>)
+          : null,
     );
   }
 

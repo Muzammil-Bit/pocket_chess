@@ -344,6 +344,13 @@ class _ResultInfo {
           color: Color(0xFF9E9E9E),
           icon: Icons.cancel_outlined,
         );
+      case SavedGameResultKind.timeout:
+        return _ResultInfo(
+          label: game.result.label(game.winner),
+          shortLabel: game.winner == PieceSide.white ? 'W' : 'B',
+          color: const Color(0xFFEF5350),
+          icon: Icons.timer_off_outlined,
+        );
     }
   }
 }

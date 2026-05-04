@@ -7,6 +7,7 @@ import 'game_session_controller.dart';
 import '../../models/ai_difficulty.dart';
 import '../../models/game_mode.dart';
 import '../../models/game_session.dart';
+import '../../models/time_control.dart';
 import '../../core/app_colors.dart';
 import '../../router/router.dart';
 import '../../router/routes.dart';
@@ -160,6 +161,20 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                       },
                       child: _buildModeContent(),
                     ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  _TimeControlSelector(
+                    selected: _session.timeControl,
+                    onChanged: (tc) {
+                      setState(() {
+                        if (tc == null) {
+                          _session = _session.copyWith(clearTimeControl: true);
+                        } else {
+                          _session = _session.copyWith(timeControl: tc);
+                        }
+                      });
+                    },
                   ),
 
                   if (!widget.stockfishSupported) ...[
@@ -324,9 +339,13 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                 engine: AiEngineKind.minimax,
                 difficulty: AiDifficulty.medium,
               ),
+          timeControl: _session.timeControl,
         ).normalized(stockfishSupported: widget.stockfishSupported);
       case GameMode.localTwoPlayer:
-        return const GameSession(mode: GameMode.localTwoPlayer);
+        return GameSession(
+          mode: GameMode.localTwoPlayer,
+          timeControl: _session.timeControl,
+        );
       case GameMode.aiVsAi:
         return GameSession(
           mode: mode,
@@ -343,6 +362,7 @@ class _PreGameSheetBodyState extends ConsumerState<_PreGameSheetBody> {
                 engine: AiEngineKind.minimax,
                 difficulty: AiDifficulty.medium,
               ),
+          timeControl: _session.timeControl,
         ).normalized(stockfishSupported: widget.stockfishSupported);
     }
   }
@@ -794,6 +814,158 @@ class _GlassButton extends StatelessWidget {
                 color: colors.textMuted,
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Time control selector
+// ---------------------------------------------------------------------------
+
+class _TimeControlSelector extends StatelessWidget {
+  const _TimeControlSelector({
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final TimeControl? selected;
+  final ValueChanged<TimeControl?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.panelBackground.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: colors.panelBorder.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: colors.accentPrimary.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.timer_outlined,
+                  size: 18,
+                  color: colors.accentPrimary,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Time control',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Optional — leave off for a free-play game.',
+                      style: TextStyle(color: colors.textMuted, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _TimeChip(
+                label: 'None',
+                isSelected: selected == null,
+                onTap: () => onChanged(null),
+              ),
+              for (final preset in TimeControl.presets)
+                _TimeChip(
+                  label: preset.label,
+                  subtitle: preset.category,
+                  isSelected: selected == preset,
+                  onTap: () => onChanged(preset),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeChip extends StatelessWidget {
+  const _TimeChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+    this.subtitle,
+  });
+
+  final String label;
+  final String? subtitle;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? colors.accentPrimary.withValues(alpha: 0.15)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: isSelected
+                ? colors.accentPrimary.withValues(alpha: 0.5)
+                : colors.panelBorder.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? colors.accentPrimary : colors.textMuted,
+              ),
+            ),
+            if (subtitle != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: isSelected
+                        ? colors.accentPrimary.withValues(alpha: 0.7)
+                        : colors.textMuted.withValues(alpha: 0.6),
+                  ),
+                ),
+              ),
           ],
         ),
       ),

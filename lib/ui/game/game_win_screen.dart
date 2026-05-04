@@ -149,7 +149,7 @@ class _GameWinScreenState extends ConsumerState<GameWinScreen>
     final state = ref.watch(gameControllerProvider);
     final winner = state.status.winner;
 
-    if (state.status.phase != GamePhase.checkmate || winner == null) {
+    if ((state.status.phase != GamePhase.checkmate && state.status.phase != GamePhase.timeout) || winner == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted && context.canPop()) context.pop();
       });

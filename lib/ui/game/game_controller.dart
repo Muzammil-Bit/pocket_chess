@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../engine/chess_engine.dart';
@@ -32,6 +34,7 @@ class GameController extends Notifier<GameState> {
   late final AiStrategyFactory _aiStrategies;
   late final GameRecorder _recorder;
   int _sessionToken = 0;
+  Timer? _clockTimer;
 
   @override
   GameState build() {
@@ -112,6 +115,7 @@ class GameController extends Notifier<GameState> {
 
   Future<void> abandonGame({bool saveToHistory = true}) async {
     _sessionToken++;
+    _stopClock();
     state = state.copyWith(
       isAiThinking: false,
       clearPendingPromotion: true,
@@ -136,10 +140,12 @@ class GameController extends Notifier<GameState> {
 
   Future<void> _beginNewGame(GameSession session) async {
     _sessionToken++;
+    _stopClock();
     final snapshot = _engine.newGame();
     state = _stateFromSnapshot(snapshot, session: session);
     await _recorder.startRecording(session: session, initialFen: snapshot.fen);
     _refreshHistory();
+    if (state.isTimed) _startClock();
     final token = _sessionToken;
     if (session.mode == GameMode.aiVsAi) {
       Future<void>.microtask(() => _maybeRunAiTurns(expectedToken: token));
@@ -196,6 +202,8 @@ class GameController extends Notifier<GameState> {
       lastMove: result.move,
     );
 
+    if (state.isTimed) _addIncrement(movingSide);
+
     await _recorder.onMoveApplied(
       RecordedMove(
         ply: _plyCountFromFen(result.snapshot.fen),
@@ -208,6 +216,7 @@ class GameController extends Notifier<GameState> {
     _refreshHistory();
 
     if (state.status.isGameOver) {
+      _stopClock();
       await _finalizeGameFromStatus();
       return;
     }
@@ -220,6 +229,7 @@ class GameController extends Notifier<GameState> {
       GamePhase.checkmate => SavedGameResultKind.checkmate,
       GamePhase.stalemate => SavedGameResultKind.stalemate,
       GamePhase.draw => SavedGameResultKind.draw,
+      GamePhase.timeout => SavedGameResultKind.timeout,
       GamePhase.active => SavedGameResultKind.abandoned,
     };
     await _recorder.finalize(
@@ -348,6 +358,7 @@ class GameController extends Notifier<GameState> {
     GameSnapshot snapshot, {
     required GameSession session,
   }) {
+    final tc = session.timeControl;
     return GameState(
       fen: snapshot.fen,
       board: snapshot.board,
@@ -355,7 +366,68 @@ class GameController extends Notifier<GameState> {
       status: snapshot.status,
       session: session,
       legalMovesByOrigin: _groupLegalMoves(snapshot.fen),
+      whiteTime: tc?.initialTime,
+      blackTime: tc?.initialTime,
     );
+  }
+
+  void _startClock() {
+    _stopClock();
+    if (!state.isTimed || state.status.isGameOver) return;
+    _clockTimer = Timer.periodic(const Duration(milliseconds: 100), (_) {
+      _tickClock();
+    });
+  }
+
+  void _stopClock() {
+    _clockTimer?.cancel();
+    _clockTimer = null;
+  }
+
+  void _tickClock() {
+    if (state.status.isGameOver) {
+      _stopClock();
+      return;
+    }
+
+    const tick = Duration(milliseconds: 100);
+    final isWhiteTurn = state.turn == PieceSide.white;
+    final current = isWhiteTurn ? state.whiteTime! : state.blackTime!;
+    final updated = current - tick;
+
+    if (updated <= Duration.zero) {
+      _stopClock();
+      final loser = state.turn;
+      final winner =
+          loser == PieceSide.white ? PieceSide.black : PieceSide.white;
+      state = state.copyWith(
+        whiteTime: isWhiteTurn ? Duration.zero : state.whiteTime,
+        blackTime: isWhiteTurn ? state.blackTime : Duration.zero,
+        status: GameStatus(
+          phase: GamePhase.timeout,
+          inCheck: false,
+          winner: winner,
+        ),
+      );
+      _finalizeGameFromStatus();
+      return;
+    }
+
+    state = state.copyWith(
+      whiteTime: isWhiteTurn ? updated : state.whiteTime,
+      blackTime: isWhiteTurn ? state.blackTime : updated,
+    );
+  }
+
+  void _addIncrement(PieceSide side) {
+    final tc = state.session.timeControl;
+    if (tc == null || tc.increment <= Duration.zero) return;
+    final current = state.timeFor(side)!;
+    if (side == PieceSide.white) {
+      state = state.copyWith(whiteTime: current + tc.increment);
+    } else {
+      state = state.copyWith(blackTime: current + tc.increment);
+    }
   }
 
   Map<SquarePosition, List<MoveOption>> _groupLegalMoves(String fen) {

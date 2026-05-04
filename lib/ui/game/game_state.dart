@@ -21,6 +21,8 @@ class GameState {
     this.pendingPromotionMove,
     this.isAiThinking = false,
     this.lastMove,
+    this.whiteTime,
+    this.blackTime,
   });
 
   final String fen;
@@ -36,6 +38,13 @@ class GameState {
   final MoveOption? pendingPromotionMove;
   final bool isAiThinking;
   final MoveOption? lastMove;
+  final Duration? whiteTime;
+  final Duration? blackTime;
+
+  bool get isTimed => session.timeControl != null;
+
+  Duration? timeFor(PieceSide side) =>
+      side == PieceSide.white ? whiteTime : blackTime;
 
   GameState copyWith({
     String? fen,
@@ -54,6 +63,8 @@ class GameState {
     bool? isAiThinking,
     MoveOption? lastMove,
     bool clearLastMove = false,
+    Duration? whiteTime,
+    Duration? blackTime,
   }) {
     return GameState(
       fen: fen ?? this.fen,
@@ -73,6 +84,8 @@ class GameState {
           : pendingPromotionMove ?? this.pendingPromotionMove,
       isAiThinking: isAiThinking ?? this.isAiThinking,
       lastMove: clearLastMove ? null : lastMove ?? this.lastMove,
+      whiteTime: whiteTime ?? this.whiteTime,
+      blackTime: blackTime ?? this.blackTime,
     );
   }
 
