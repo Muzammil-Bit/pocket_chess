@@ -303,8 +303,8 @@ class _HeroKing extends StatelessWidget {
     final colors = context.appColors;
 
     return SizedBox(
-      width: 140,
-      height: 140,
+      width: 196,
+      height: 196,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -316,8 +316,8 @@ class _HeroKing extends StatelessWidget {
               return Transform.scale(
                 scale: scale,
                 child: Container(
-                  width: 130,
-                  height: 130,
+                  width: 180,
+                  height: 180,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     border: Border.all(
@@ -336,8 +336,8 @@ class _HeroKing extends StatelessWidget {
               return Transform.scale(
                 scale: scale,
                 child: Container(
-                  width: 100,
-                  height: 100,
+                  width: 142,
+                  height: 142,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
@@ -354,8 +354,8 @@ class _HeroKing extends StatelessWidget {
             },
           ),
           Container(
-            width: 88,
-            height: 88,
+            width: 126,
+            height: 126,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
@@ -382,7 +382,7 @@ class _HeroKing extends StatelessWidget {
               child: Text(
                 '\u265A',
                 style: TextStyle(
-                  fontSize: 44,
+                  fontSize: 68,
                   height: 1,
                   color: colors.textHeading,
                 ),
