@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pocket_chess/domain/models/promotion_choice.dart';
-import 'package:pocket_chess/domain/models/square_position.dart';
-import 'package:pocket_chess/infrastructure/engine/package_chess_engine.dart';
+import 'package:pocket_chess/models/promotion_choice.dart';
+import 'package:pocket_chess/models/square_position.dart';
+import 'package:pocket_chess/engine/package_chess_engine.dart';
 
 void main() {
   final engine = PackageChessEngine();

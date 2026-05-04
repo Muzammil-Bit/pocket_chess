@@ -2,17 +2,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:pocket_chess/application/app_settings_controller.dart';
-import 'package:pocket_chess/application/game_controller.dart';
-import 'package:pocket_chess/application/game_history_repository.dart';
-import 'package:pocket_chess/application/providers.dart';
-import 'package:pocket_chess/domain/models/ai_difficulty.dart';
-import 'package:pocket_chess/domain/models/game_mode.dart';
-import 'package:pocket_chess/domain/models/game_session.dart';
-import 'package:pocket_chess/domain/models/piece_data.dart';
-import 'package:pocket_chess/domain/models/saved_game.dart';
-import 'package:pocket_chess/domain/models/square_position.dart';
-import 'package:pocket_chess/infrastructure/engine/package_chess_engine.dart';
+import 'package:pocket_chess/settings/app_settings_controller.dart';
+import 'package:pocket_chess/game/game_controller.dart';
+import 'package:pocket_chess/game/game_history_repository.dart';
+import 'package:pocket_chess/providers.dart';
+import 'package:pocket_chess/models/ai_difficulty.dart';
+import 'package:pocket_chess/models/game_mode.dart';
+import 'package:pocket_chess/models/game_session.dart';
+import 'package:pocket_chess/models/piece_data.dart';
+import 'package:pocket_chess/models/saved_game.dart';
+import 'package:pocket_chess/models/square_position.dart';
+import 'package:pocket_chess/engine/package_chess_engine.dart';
 
 class _MemoryGameHistoryRepository implements GameHistoryRepository {
   final Map<String, SavedGameDetail> _games = {};

@@ -2,11 +2,11 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:pocket_chess/domain/models/ai_difficulty.dart';
-import 'package:pocket_chess/domain/models/game_mode.dart';
-import 'package:pocket_chess/domain/models/game_session.dart';
-import 'package:pocket_chess/domain/models/piece_data.dart';
-import 'package:pocket_chess/domain/models/saved_game.dart';
+import 'package:pocket_chess/models/ai_difficulty.dart';
+import 'package:pocket_chess/models/game_mode.dart';
+import 'package:pocket_chess/models/game_session.dart';
+import 'package:pocket_chess/models/piece_data.dart';
+import 'package:pocket_chess/models/saved_game.dart';
 
 void main() {
   test('saved game detail round-trips through json', () {
