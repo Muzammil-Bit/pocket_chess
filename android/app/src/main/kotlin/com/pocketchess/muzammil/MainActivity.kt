@@ -1,4 +1,4 @@
-package com.example.chess
+package com..pocketchess.muzammil
 
 import io.flutter.embedding.android.FlutterActivity
 
