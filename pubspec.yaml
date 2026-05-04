@@ -23,6 +23,7 @@ dependencies:
   stockfish: ^1.8.1
   uuid: ^4.5.1
   confetti: ^0.8.0
+  change_app_package_name: ^1.5.0
 
 dev_dependencies:
   flutter_test:
