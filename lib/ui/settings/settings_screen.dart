@@ -304,43 +304,19 @@ class _ThemeCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: Center(
-                  child: Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      for (final piece in _previewPieces)
-                        ThemedPieceIcon(piece: piece, theme: theme, size: 38),
-                    ],
-                  ),
-                ),
+                child: Center(child: _MiniBoardPreview(theme: theme)),
               ),
               const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      theme.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: colors.textHeading,
-                        fontSize: 14,
-                        fontWeight: isSelected
-                            ? FontWeight.w700
-                            : FontWeight.w600,
-                        letterSpacing: -0.1,
-                      ),
-                    ),
-                  ),
-                  if (isSelected)
-                    Icon(
-                      Icons.radio_button_checked_rounded,
-                      size: 18,
-                      color: colors.accentBorder,
-                    ),
-                ],
+              Text(
+                theme.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colors.textHeading,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                  letterSpacing: -0.1,
+                ),
               ),
             ],
           ),
@@ -371,9 +347,71 @@ class _GlowOrb extends StatelessWidget {
   }
 }
 
+/// A 2x2 board with one piece per square, so every set is previewed against
+/// the board colors it is drawn for, whatever the app theme.
+class _MiniBoardPreview extends StatelessWidget {
+  const _MiniBoardPreview({required this.theme});
+
+  final PieceThemeOption theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.appColors;
+
+    return AspectRatio(
+      aspectRatio: 1,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.18),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Column(
+            children: [
+              for (var row = 0; row < 2; row++)
+                Expanded(
+                  child: Row(
+                    children: [
+                      for (var col = 0; col < 2; col++)
+                        Expanded(
+                          child: ColoredBox(
+                            color: (row + col).isEven
+                                ? colors.boardLightSquare
+                                : colors.boardDarkSquare,
+                            child: LayoutBuilder(
+                              builder: (context, constraints) => Center(
+                                child: ThemedPieceIcon(
+                                  piece: _previewPieces[row * 2 + col],
+                                  theme: theme,
+                                  size: constraints.maxWidth * 0.82,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Laid out row by row on a checkerboard, so each side appears on both a
+// light and a dark square.
 const _previewPieces = [
   PieceData(side: PieceSide.white, kind: PieceKind.king),
-  PieceData(side: PieceSide.white, kind: PieceKind.queen),
-  PieceData(side: PieceSide.black, kind: PieceKind.knight),
+  PieceData(side: PieceSide.black, kind: PieceKind.queen),
+  PieceData(side: PieceSide.white, kind: PieceKind.knight),
   PieceData(side: PieceSide.black, kind: PieceKind.pawn),
 ];
