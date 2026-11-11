@@ -510,6 +510,45 @@ class _SegmentLabel<T> extends StatelessWidget {
   }
 }
 
+/// Shrinks its child while pressed and springs back on release, so taps get
+/// immediate feedback. A tap that slides off the child is cancelled.
+class _PressScale extends StatefulWidget {
+  const _PressScale({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) {
+      setState(() => _pressed = value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _setPressed(true),
+      onTapUp: (_) => _setPressed(false),
+      onTapCancel: () => _setPressed(false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _pressed ? 0.95 : 1,
+        duration: Duration(milliseconds: _pressed ? 90 : 220),
+        curve: _pressed ? Curves.easeOut : Curves.easeOutBack,
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 // Mode picker
 
 class _ModePicker extends StatelessWidget {
@@ -565,11 +604,14 @@ class _ModeTile extends StatelessWidget {
     final colors = context.appColors;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final foreground = isSelected ? Colors.white : colors.textHeading;
+    final unselectedFill = colors.panelBackground.withValues(
+      alpha: isDark ? 0.55 : 0.9,
+    );
 
     return Semantics(
       button: true,
       selected: isSelected,
-      child: GestureDetector(
+      child: _PressScale(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 240),
@@ -578,30 +620,29 @@ class _ModeTile extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 14, 10, 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(22),
-            color: isSelected
-                ? null
-                : colors.panelBackground.withValues(alpha: isDark ? 0.55 : 0.9),
-            gradient: isSelected
-                ? LinearGradient(
-                    colors: [colors.accentPrimary, colors.accentBorder],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  )
-                : null,
+            // Both states use a gradient and a shadow so the change animates
+            // instead of snapping between a flat fill and a gradient.
+            gradient: LinearGradient(
+              colors: isSelected
+                  ? [colors.accentPrimary, colors.accentBorder]
+                  : [unselectedFill, unselectedFill],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             border: Border.all(
               color: isSelected
                   ? Colors.white.withValues(alpha: 0.18)
                   : colors.panelBorder.withValues(alpha: 0.35),
             ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: colors.accentPrimary.withValues(alpha: 0.35),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
+            boxShadow: [
+              BoxShadow(
+                color: colors.accentPrimary.withValues(
+                  alpha: isSelected ? 0.35 : 0,
+                ),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -899,7 +940,7 @@ class _TimeTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      child: GestureDetector(
+      child: _PressScale(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
