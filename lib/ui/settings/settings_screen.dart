@@ -301,7 +301,7 @@ class _ThemeCard extends StatelessWidget {
           ),
           padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: Center(child: _MiniBoardPreview(theme: theme)),
@@ -309,6 +309,7 @@ class _ThemeCard extends StatelessWidget {
               const SizedBox(height: 10),
               Text(
                 theme.label,
+                textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
