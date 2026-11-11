@@ -277,49 +277,55 @@ class _ThemeCard extends StatelessWidget {
     final colors = context.appColors;
     final borderColor = isSelected ? colors.accentBorder : colors.cardBorder;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
-          decoration: BoxDecoration(
-            color: colors.cardBackground,
-            borderRadius: BorderRadius.circular(22),
-            border: Border.all(color: borderColor, width: isSelected ? 1.6 : 1),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: colors.accentPrimary.withValues(alpha: 0.26),
-                      blurRadius: 22,
-                      offset: const Offset(0, 10),
-                    ),
-                  ]
-                : null,
-          ),
-          padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: Center(child: _MiniBoardPreview(theme: theme)),
+    return Semantics(
+      selected: isSelected,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            decoration: BoxDecoration(
+              color: colors.cardBackground,
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: borderColor,
+                width: isSelected ? 1.6 : 1,
               ),
-              const SizedBox(height: 10),
-              Text(
-                theme.label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: colors.textHeading,
-                  fontSize: 14,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  letterSpacing: -0.1,
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: colors.accentPrimary.withValues(alpha: 0.26),
+                        blurRadius: 22,
+                        offset: const Offset(0, 10),
+                      ),
+                    ]
+                  : null,
+            ),
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: Center(child: _MiniBoardPreview(theme: theme)),
                 ),
-              ),
-            ],
+                const SizedBox(height: 10),
+                Text(
+                  theme.label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textHeading,
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

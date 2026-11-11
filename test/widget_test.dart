@@ -210,11 +210,8 @@ void main() {
     await tapAndPump(tester, find.byKey(const Key('open-settings-button')));
 
     expect(
-      find.descendant(
-        of: find.byKey(const Key('piece-theme-maestro')),
-        matching: find.byIcon(Icons.radio_button_checked_rounded),
-      ),
-      findsOneWidget,
+      tester.getSemantics(find.byKey(const Key('piece-theme-maestro'))),
+      isSemantics(isSelected: true),
     );
   });
 
