@@ -144,6 +144,37 @@ void main() {
     expect(find.byType(Chessboard), findsOneWidget);
   });
 
+  testWidgets('clock switch shows presets and restores the last pick', (
+    WidgetTester tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+
+    await pumpChessApp(tester, preferences);
+    await tapAndPump(tester, find.byKey(const Key('start-game-button')));
+
+    final clockSwitch = find.byKey(const Key('clock-switch'));
+    expect(find.text('10 min'), findsNothing);
+
+    await tester.ensureVisible(clockSwitch);
+    await tapAndPump(tester, clockSwitch);
+    expect(find.text('10 min'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('10 min'));
+    await tapAndPump(tester, find.text('10 min'));
+
+    await tester.ensureVisible(clockSwitch);
+    await tapAndPump(tester, clockSwitch);
+    expect(find.text('10 min'), findsNothing);
+
+    await tapAndPump(tester, clockSwitch);
+    final tile = find.ancestor(
+      of: find.text('10 min'),
+      matching: find.byType(Semantics),
+    );
+    expect(tester.getSemantics(tile.first), isSemantics(isSelected: true));
+  });
+
   testWidgets('settings screen opens from the landing page', (
     WidgetTester tester,
   ) async {
